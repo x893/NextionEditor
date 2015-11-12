@@ -1,0 +1,278 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+  <PropertyGroup>
+    <ProjectType>local</ProjectType>
+    <ProjectVersion>7.10.377</ProjectVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{6471DE2F-DC3A-4F42-81DB-1A50AC7776F3}</ProjectGuid>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <AssemblyName>NextionEditor</AssemblyName>
+    <OutputType>WinExe</OutputType>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <Prefer32Bit>false</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <RootNamespace>NextionEditor</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <EmbeddedResource Include="Class\GuiObjControl.resx">
+      <DependentUpon>GuiObjControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Control\HmiObjectEdit.resx">
+      <DependentUpon>HmiObjectEdit.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Control\HmiRunScreen.resx">
+      <DependentUpon>HmiRunScreen.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form\AddPicture.resx">
+      <DependentUpon>AddPicture.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Control\FontAdmin.resx">
+      <DependentUpon>FontAdmin.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form\FontCreator.resx">
+      <DependentUpon>FontCreator.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form\FontView.resx">
+      <DependentUpon>FontView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Control\ImgPicture.resx">
+      <DependentUpon>ImgPicture.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form\MemberAdd.resx">
+      <DependentUpon>MemberAdd.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Control\ObjCompiler.resx">
+      <DependentUpon>ObjCompiler.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Control\ObjEdit.resx">
+      <DependentUpon>ObjEdit.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Control\PageAdmin.resx">
+      <DependentUpon>PageAdmin.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Control\PageImg.resx">
+      <DependentUpon>PageImg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Control\PicAdmin.resx">
+      <DependentUpon>PicAdmin.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form\PicSelect.resx">
+      <DependentUpon>PicSelect.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form\PicView.resx">
+      <DependentUpon>PicView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form\SerialDebug.resx">
+      <DependentUpon>SerialDebug.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form\DeviceParameters.resx">
+      <DependentUpon>DeviceParameters.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form\SaveOther.resx">
+      <DependentUpon>SaveOther.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form\main.resx">
+      <DependentUpon>main.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form\EyeDropper.resx">
+      <DependentUpon>EyeDropper.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form\FirmwareUpload.resx">
+      <DependentUpon>FirmwareUpload.cs</DependentUpon>
+    </EmbeddedResource>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>.\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System" />
+    <Reference Include="System.Drawing" />
+    <Compile Include="Class\DataPut.cs" />
+    <Compile Include="Class\DownloadUrl.cs" />
+    <Compile Include="Class\GuiApplication.cs" />
+    <Compile Include="Class\GuiCurve.cs" />
+    <Compile Include="Class\GuiObjControl.cs" />
+    <Compile Include="Class\GuiSlider.cs" />
+    <Compile Include="Class\HmiApplication.cs" />
+    <Compile Include="Class\HmiAttribute.cs" />
+    <Compile Include="Class\HmiObject.cs" />
+    <Compile Include="Class\HmiAttributeType.cs" />
+    <Compile Include="Class\HmiOptions.cs" />
+    <Compile Include="Class\HmiPage.cs" />
+    <Compile Include="Class\HmiTPDev.cs" />
+    <Compile Include="Class\IsYesNo.cs" />
+    <Compile Include="Class\MouseState.cs" />
+    <Compile Include="Class\ObjAttOperation.cs" />
+    <Compile Include="Class\HmiObjType.cs" />
+    <Compile Include="Class\HmiSysTimer.cs" />
+    <Compile Include="Class\Utility.cs" />
+    <Compile Include="Control\HmiObjectEdit.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Control\HmiRunScreen.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Form\AddPicture.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="Control\FontAdmin.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Form\FontCreator.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form\FontView.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Class\GdiFont.cs" />
+    <Compile Include="Control\ImgPicture.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Form\MemberAdd.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Control\ObjCompiler.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Control\ObjEdit.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Control\PageAdmin.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Control\PageImg.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Control\PicAdmin.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Form\PicSelect.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form\PicView.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form\SerialDebug.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form\main.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Class\ComUser.cs" />
+    <Compile Include="Info\InfoAction.cs" />
+    <Compile Include="BinInfo\InfoApp.cs" />
+    <Compile Include="BinInfo\InfoAttribute.cs" />
+    <Compile Include="Info\InfoBrush.cs" />
+    <Compile Include="BinInfo\InfoBytes14.cs" />
+    <Compile Include="Info\InfoBytes24.cs" />
+    <Compile Include="Info\InfoCodeResults.cs" />
+    <Compile Include="BinInfo\InfoFirmware.cs" />
+    <Compile Include="BinInfo\InfoFont.cs" />
+    <Compile Include="Class\FormParams.cs" />
+    <Compile Include="BinInfo\InfoObject.cs" />
+    <Compile Include="BinInfo\InfoPage.cs" />
+    <Compile Include="Info\InfoPageObject.cs" />
+    <Compile Include="BinInfo\InfoPanel.cs" />
+    <Compile Include="BinInfo\InfoPicture.cs" />
+    <Compile Include="Info\InfoRange.cs" />
+    <Compile Include="Info\InfoRunAttribute.cs" />
+    <Compile Include="Info\InfoSliderParam.cs" />
+    <Compile Include="BinInfo\InfoString.cs" />
+    <Compile Include="Info\InfoTime.cs" />
+    <Compile Include="Info\InfoTimer.cs" />
+    <Compile Include="Info\InfoTouch.cs" />
+    <Compile Include="Info\InfoUsartUpdata.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Form\FirmwareUpload.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form\EyeDropper.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form\DeviceParameters.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Form\SaveOther.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Properties\Settings.cs" />
+    <Reference Include="System.XML" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="lexis.lang">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="fwc.bin">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Newtonsoft.Json.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+</Project>
