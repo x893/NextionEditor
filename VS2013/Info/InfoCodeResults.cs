@@ -6,6 +6,6 @@ namespace NextionEditor
 {
 	public class InfoCodeResults
 	{
-		public InfoRange[] CodeResults;
+		public Range[] CodeResults;
 	}
 }

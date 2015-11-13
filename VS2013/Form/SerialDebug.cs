@@ -31,16 +31,15 @@ namespace NextionEditor
 		private bool m_curveSendSim = false;
 		private byte[] m_channelId = new byte[4];
 		private ComUser m_comMcu = new ComUser();
+		private SerialPort m_com;
 
-		private Button btnClearLog;
 		private Button btnSend;
-		private ToolStripButton mi_Connect;
+		private ToolStripButton miConnect;
 		private CheckBox cbPressEnter;
 		private CheckBox cbRandom;
-		private SerialPort m_com;
-		private ToolStripComboBox SendTo;
+		private ToolStripComboBox cbSendTo;
 		private ComboBox cbComPorts;
-		private ToolStripComboBox SendToCom;
+		private ToolStripComboBox cbSendToCom;
 		private ComboBox cbBaudRates;
 		private IContainer components = null;
 		private GroupBox groupBox1;
@@ -56,16 +55,15 @@ namespace NextionEditor
 		private Label label7;
 		private Label label8;
 		private Label label9;
-		private Label lbl_SimParse;
-		private Label lbl_McuParse;
-		private LinkLabel link_RunAll;
-		private LinkLabel link_SimClear;
-		private LinkLabel link_McuClear;
-		private LinkLabel link_Start;
+		private Label lblSimParse;
+		private Label lblMcuParse;
+		private LinkLabel linkRunAll;
+		private LinkLabel linkSimClear;
+		private LinkLabel linkMcuClear;
+		private LinkLabel linkStart;
 		private LinkLabel linkWaveform;
-		private ListBox lb_SimResponses;
-		private ListBox lb_McuResponses;
-		private ListBox lb_Log;
+		private ListBox lblSimResponses;
+		private ListBox lblMcuResponses;
 		private Panel panelDisplay;
 		private Panel panel2;
 		private RadioButton rbKeyboardInput;
@@ -82,11 +80,11 @@ namespace NextionEditor
 		private System.Windows.Forms.Timer timerMcuRead;
 		private System.Windows.Forms.Timer TimerCom;
 		private ToolStrip toolStrip;
-		private ToolStripButton mi_Upload;
-		private ToolStripLabel mi_SendCommandTo;
-		private ToolStripButton mi_XY;
-		private ToolStripLabel lbl_ComPort;
-		private ToolStripStatusLabel lbl_statusText;
+		private ToolStripButton miUpload;
+		private ToolStripLabel miSendCommandTo;
+		private ToolStripButton miXY;
+		private ToolStripLabel lblComPort;
+		private ToolStripStatusLabel lblstatusText;
 		#endregion
 
 		#region Constructor
@@ -107,21 +105,14 @@ namespace NextionEditor
 			{
 				int x_center = ((base.Width - label1.Left) - 10) / 2;
 				label3.Left = label1.Left + x_center;
-				lb_McuResponses.Left = label3.Left;
-				lbl_McuParse.Left = label3.Left;
-				lb_SimResponses.Width = x_center - 10;
-				lb_McuResponses.Width = x_center - 10;
-				link_SimClear.Left = (lb_SimResponses.Left + lb_SimResponses.Width) - link_SimClear.Width;
-				link_McuClear.Left = (lb_McuResponses.Left + lb_McuResponses.Width) - link_McuClear.Width;
+				lblMcuResponses.Left = label3.Left;
+				lblMcuParse.Left = label3.Left;
+				lblSimResponses.Width = x_center - 10;
+				lblMcuResponses.Width = x_center - 10;
+				linkSimClear.Left = (lblSimResponses.Left + lblSimResponses.Width) - linkSimClear.Width;
+				linkMcuClear.Left = (lblMcuResponses.Left + lblMcuResponses.Width) - linkMcuClear.Width;
 			}
 			catch { }
-		}
-		#endregion
-
-		#region btnClearLog_Click
-		private void btnClearLog_Click(object sender, EventArgs e)
-		{
-			lb_Log.Items.Clear();
 		}
 		#endregion
 
@@ -138,9 +129,9 @@ namespace NextionEditor
 					m_curveSendSim = false;
 					m_curveSendCom = false;
 
-					if (SendTo.SelectedIndex == 0 || SendTo.SelectedIndex == 2)
+					if (cbSendTo.SelectedIndex == 0 || cbSendTo.SelectedIndex == 2)
 						m_curveSendSim = true;
-					if (SendTo.SelectedIndex == 1 || SendTo.SelectedIndex == 2)
+					if (cbSendTo.SelectedIndex == 1 || cbSendTo.SelectedIndex == 2)
 						m_curveSendCom = true;
 
 					m_curveAmplitude = (int.Parse(tbMaxValue.Text) - int.Parse(tbMinValue.Text)) / 2;
@@ -157,9 +148,9 @@ namespace NextionEditor
 						tbComponentId.Enabled = false;
 						tbMinValue.Enabled = false;
 						tbMaxValue.Enabled = false;
-						mi_Connect.Enabled = false;
-						SendTo.Enabled = false;
-						SendToCom.Enabled = false;
+						miConnect.Enabled = false;
+						cbSendTo.Enabled = false;
+						cbSendToCom.Enabled = false;
 
 						m_stopSend = 1;
 						m_send_thread = new Thread(new ThreadStart(sendProcess));
@@ -177,36 +168,36 @@ namespace NextionEditor
 		{
 			m_comMcu.ComClose();
 			timerMcuRead.Enabled = false;
-			mi_Connect.Text = "Connect".Translate();
-			lbl_statusText.Text = "State:".Translate() + "Disconnected".Translate();
+			miConnect.Text = "Connect".Translate();
+			lblstatusText.Text = "State:".Translate() + "Disconnected".Translate();
 		}
 		#endregion
 
 		#region SendTo_SelectedIndexChanged
 		private void SendTo_SelectedIndexChanged(object sender, EventArgs e)
 		{
-			rbMcuInput.Enabled = SendTo.SelectedIndex == 0;
+			rbMcuInput.Enabled = cbSendTo.SelectedIndex == 0;
 
-			if (SendTo.SelectedIndex != 1 && SendTo.SelectedIndex != 2)
+			if (cbSendTo.SelectedIndex != 1 && cbSendTo.SelectedIndex != 2)
 			{
 				closeLink();
-				SendToCom.Visible = false;
-				mi_Connect.Visible = false;
-				lbl_ComPort.Visible = false;
-				lb_McuResponses.BackColor = BackColor;
-				lb_SimResponses.BackColor = Color.White;
+				cbSendToCom.Visible = false;
+				miConnect.Visible = false;
+				lblComPort.Visible = false;
+				lblMcuResponses.BackColor = BackColor;
+				lblSimResponses.BackColor = Color.White;
 			}
 			else
 			{
-				if (SendTo.SelectedIndex == 1)
-					lb_SimResponses.BackColor = BackColor;
+				if (cbSendTo.SelectedIndex == 1)
+					lblSimResponses.BackColor = BackColor;
 				else
-					lb_SimResponses.BackColor = Color.White;
+					lblSimResponses.BackColor = Color.White;
 
-				lb_McuResponses.BackColor = Color.White;
-				lbl_ComPort.Visible = true;
-				SendToCom.Visible = true;
-				mi_Connect.Visible = true;
+				lblMcuResponses.BackColor = Color.White;
+				lblComPort.Visible = true;
+				cbSendToCom.Visible = true;
+				miConnect.Visible = true;
 			}
 		}
 		#endregion
@@ -256,9 +247,9 @@ namespace NextionEditor
 			{
 				if (comOpen(cbComPorts.Text, Utility.GetInt(cbBaudRates.Text)))
 				{
-					lb_McuResponses.Items.Clear();
+					lblMcuResponses.Items.Clear();
 					tbManualCommand.Text = "";
-					link_Start.Text = "Stop".Translate();
+					linkStart.Text = "Stop".Translate();
 					cbComPorts.Enabled = false;
 					cbBaudRates.Enabled = false;
 					timerMcuRead.Enabled = true;
@@ -268,7 +259,7 @@ namespace NextionEditor
 			{
 				timerMcuRead.Enabled = false;
 				comClose();
-				link_Start.Text = "Start".Translate();
+				linkStart.Text = "Start".Translate();
 				cbComPorts.Enabled = true;
 				cbBaudRates.Enabled = true;
 			}
@@ -279,18 +270,18 @@ namespace NextionEditor
 		private void getPorts()
 		{
 			cbComPorts.Items.Clear();
-			SendToCom.Items.Clear();
-			SendToCom.Items.Add("Auto Search".Translate());
+			cbSendToCom.Items.Clear();
+			cbSendToCom.Items.Add("Auto Search".Translate());
 			string[] portNames = null;
 			try
 			{
 				portNames = SerialPort.GetPortNames();
 				foreach (string str in portNames)
 				{
-					SendToCom.Items.Add(str);
+					cbSendToCom.Items.Add(str);
 					cbComPorts.Items.Add(str);
 				}
-				SendToCom.SelectedIndex = 0;
+				cbSendToCom.SelectedIndex = 0;
 				if (cbComPorts.Items.Count > 0)
 					cbComPorts.SelectedIndex = 0;
 			}
@@ -325,6 +316,649 @@ namespace NextionEditor
 		}
 		#endregion
 
+		#region linkRunAll_LinkClicked
+		private void linkRunAll_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+		{
+			sendAll();
+		}
+		#endregion
+
+		#region linkSimRespClear_LinkClicked
+		private void linkSimRespClear_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+		{
+			lblSimResponses.Items.Clear();
+		}
+		#endregion
+
+		#region McuRespClear_LinkClicked
+		private void McuRespClear_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+		{
+			lblMcuResponses.Items.Clear();
+		}
+		#endregion
+
+		#region WaveformGererator_LinkClicked
+		private void WaveformGererator_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+		{
+			if (!panel2.Visible)
+				panel2.Visible = true;
+			else
+			{
+				stopSend();
+				panel2.Visible = false;
+			}
+		}
+		#endregion
+
+		#region listSimResponses_DoubleClick
+		private void listSimResponses_DoubleClick(object sender, EventArgs e)
+		{
+			try
+			{
+				Clipboard.SetDataObject(lblSimResponses.SelectedItem.ToString());
+			}
+			catch { }
+		}
+		#endregion
+
+		#region showError
+		private void showError(Label label, string response)
+		{
+			label.Text = "Meaning:".Translate() + Utility.GetErrorText(response);
+
+			int num = Convert.ToInt32(response.Split(Utility.CHAR_SPACE)[0], 16);
+			if (num == 0 || (num > 1 && num < 0x65))
+				label.ForeColor = Color.Red;
+			else
+				label.ForeColor = Color.Black;
+		}
+		#endregion
+
+		#region listSimResponses_SelectedIndexChanged
+		private void listSimResponses_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			if (lblSimResponses.Items.Count > 0 && lblSimResponses.SelectedIndex >= 0)
+				showError(lblSimParse, lblSimResponses.SelectedItem.ToString());
+		}
+		#endregion
+
+		#region listMcuResponses_SelectedIndexChanged
+		private void listMcuResponses_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			if (lblMcuResponses.Items.Count > 0 && lblMcuResponses.SelectedIndex >= 0)
+				showError(lblMcuParse, lblMcuResponses.SelectedItem.ToString());
+		}
+		#endregion
+
+		#region McuResponses_DoubleClick
+		private void listMcuResponses_DoubleClick(object sender, EventArgs e)
+		{
+			try
+			{
+				Clipboard.SetDataObject(lblMcuResponses.SelectedItem.ToString());
+			}
+			catch { }
+		}
+		#endregion
+
+		#region openMcuLink
+		private void openMcuLink()
+		{
+			string status = string.Empty;
+			if (m_comMcu.GetDevicePort(ref status, cbSendToCom.Text, 0) == 1)
+			{
+				m_enableMcuReceive = false;
+				timerMcuRead.Enabled = true;
+				miConnect.Text = "Disconnect".Translate();
+			}
+			lblstatusText.Text = status;
+		}
+		#endregion
+
+		#region panelDisplay_Paint
+		private void panelDisplay_Paint(object sender, PaintEventArgs e)
+		{
+			try
+			{
+				int offset = 7;
+				Pen pen = new Pen(Color.Yellow, 1f);
+				Graphics graphics = panelDisplay.CreateGraphics();
+				graphics.Clear(panelDisplay.BackColor);
+				if (ucRunScreen.Visible && m_showXY)
+				{
+					graphics.DrawString("(0,0)", new Font(Encoding.Default.EncodingName, 9f), new SolidBrush(Color.Yellow), (PointF)new Point((ucRunScreen.Left - offset) - 0x11, (ucRunScreen.Top - offset) - 15));
+					graphics.DrawString("X", new Font(Encoding.Default.EncodingName, 9f), new SolidBrush(Color.Yellow), (PointF)new Point((ucRunScreen.Left + (ucRunScreen.Width / 2)) - 5, (ucRunScreen.Top - offset) - 0x11));
+					graphics.DrawString("Y", new Font(Encoding.Default.EncodingName, 9f), new SolidBrush(Color.Yellow), (PointF)new Point(ucRunScreen.Left - 20, (ucRunScreen.Top + (ucRunScreen.Height / 2)) - 5));
+					graphics.DrawLine(pen, new Point(ucRunScreen.Left - offset, ucRunScreen.Top - offset), new Point(ucRunScreen.Left + ucRunScreen.Width, ucRunScreen.Top - offset));
+					graphics.DrawLine(pen, new Point((ucRunScreen.Left + ucRunScreen.Width) - 8, (ucRunScreen.Top - offset) - 4), new Point(ucRunScreen.Left + ucRunScreen.Width, ucRunScreen.Top - offset));
+					graphics.DrawLine(pen, new Point(ucRunScreen.Left - offset, ucRunScreen.Top - offset), new Point(ucRunScreen.Left - offset, ucRunScreen.Top + ucRunScreen.Height));
+					graphics.DrawLine(pen, new Point((ucRunScreen.Left - offset) - 4, (ucRunScreen.Top + ucRunScreen.Height) - 8), new Point(ucRunScreen.Left - offset, ucRunScreen.Top + ucRunScreen.Height));
+				}
+			}
+			catch { }
+		}
+		#endregion
+
+		#region panelDisplay_Resize
+		private void panelDisplay_Resize(object sender, EventArgs e)
+		{
+			resizeForm();
+		}
+		#endregion
+
+		#region rbKeyboardMcyInput_CheckedChanged
+		private void rbKeyboardMcyInput_CheckedChanged(object sender, EventArgs e)
+		{
+			linkRunAll.Visible =
+			cbSendTo.Enabled =
+			linkWaveform.Visible =
+			miUpload.Enabled = rbKeyboardInput.Checked;
+
+			linkStart.Visible =
+			label7.Visible =
+			label8.Visible =
+			cbComPorts.Visible =
+			cbBaudRates.Visible =
+			tbManualCommand.ReadOnly = rbMcuInput.Checked;
+
+			m_enableMcuReceive = !rbKeyboardInput.Checked;
+
+			if (rbKeyboardInput.Checked && m_com.IsOpen)
+			{
+				timerMcuRead.Enabled = false;
+				comClose();
+
+				linkStart.Text = "Start".Translate();
+				cbComPorts.Enabled = true;
+				cbBaudRates.Enabled = true;
+			}
+		}
+		#endregion
+
+		#region resizeForm
+		private void resizeForm()
+		{
+			try
+			{
+				ucRunScreen.Left = (panelDisplay.Width - ucRunScreen.Width) / 2;
+				ucRunScreen.Top = (panelDisplay.Height - ucRunScreen.Height) / 2;
+				if (ucRunScreen.Left < 25)
+					ucRunScreen.Left = 25;
+				if (ucRunScreen.Top < 25)
+					ucRunScreen.Top = 25;
+			}
+			catch { }
+		}
+		#endregion
+
+		#region SerialDebug_FormClosing
+		private void SerialDebug_FormClosing(object sender, FormClosingEventArgs e)
+		{
+			if (m_comMcu.RunState == 0)
+			{
+				m_comMcu.RunState = 2;
+				e.Cancel = true;
+			}
+			else
+			{
+				stopSend();
+				m_comMcu.ComClose();
+				ucRunScreen.RunStop();
+			}
+		}
+		#endregion
+
+		#region ucRunScreen_MouseWheel
+		private void ucRunScreen_MouseWheel(object sender, MouseEventArgs e)
+		{
+			if (ucRunScreen.Visible)
+			{
+				setZoomFactor(e.Delta);
+				((HandledMouseEventArgs)e).Handled = true;
+			}
+		}
+		private void setZoomFactor(int delta)
+		{
+			if (panelDisplay.InvokeRequired)
+				panelDisplay.Invoke(new Action<int>(setZoomFactor), delta);
+			else if (ucRunScreen.SetZoom(delta))
+			{
+				resizeForm();
+				panelDisplay.Refresh();
+			}
+		}
+		#endregion
+
+		#region SerialDebug_Load
+		private void SerialDebug_Load(object sender, EventArgs e)
+		{
+			base.Icon = HmiOptions.Icon;
+			Text = HmiOptions.SoftName;
+
+			//!!! wheel ucRunScreen.MouseWheel += new MouseEventHandler(ucRunScreen_MouseWheel);
+
+			m_channelId[0] = 0;
+			m_channelId[1] = 0xff;
+			m_channelId[2] = 0xff;
+			m_channelId[3] = 0xff;
+
+			cbBaudRates.Items.Clear();
+			cbBaudRates.Items.Add("2400");
+			cbBaudRates.Items.Add("4800");
+			cbBaudRates.Items.Add("9600");
+			cbBaudRates.SelectedIndex = cbBaudRates.Items.Count - 1;
+			cbBaudRates.Items.Add("19200");
+			cbBaudRates.Items.Add("38400");
+			cbBaudRates.Items.Add("57600");
+			cbBaudRates.Items.Add("115200");
+
+			cbSendToCom.Visible = false;
+			miConnect.Visible = false;
+			lblComPort.Visible = false;
+			m_receivedMcuData = "";
+			cbSendTo.Items.Clear();
+			cbSendTo.Items.Add("Current Simulator".Translate());
+			cbSendTo.Items.Add("Nextion Device".Translate());
+			cbSendTo.Items.Add("Simulator and Nextion Device".Translate());
+			cbSendTo.SelectedIndex = 0;
+			getPorts();
+			m_comMcu.Port = m_com;
+		}
+		#endregion
+
+		#region ucRunScreen_Resize
+		private void ucRunScreen_Resize(object sender, EventArgs e)
+		{
+			resizeForm();
+		}
+		#endregion
+
+		#region ucRunScreen_SendRunCode
+		private void ucRunScreen_SendRunCode(string command)
+		{
+			// Can log sender as command
+			string cmd = command;
+		}
+		#endregion
+
+		#region ucRunScreen_SendByte
+		private void ucRunScreen_SendByte(object sender, EventArgs e)
+		{
+			m_ms_lastSimReceive = 0;
+			int num = (int)sender;
+			string str = Convert.ToString(num, 16);
+			if (str.Length == 1)
+				str = "0" + str;
+
+			m_receivedSimData = m_receivedSimData + "0x" + str + " ";
+			if (m_enableMcuReceive && m_com.IsOpen)
+			{
+				byte[] buffer = new byte[] { (byte)num };
+				m_com.Write(buffer, 0, 1);
+			}
+			if (str == "ff")
+				m_ddx++;
+			else
+				m_ddx = 0;
+
+			if (m_ddx >= 3)
+			{
+				m_ddx = 0;
+				addToSimResponse(m_receivedSimData.Trim());
+				m_receivedSimData = "";
+			}
+		}
+		#endregion
+
+		#region sendAll
+		private void sendAll()
+		{
+			lblSimResponses.Items.Clear();
+			lblMcuResponses.Items.Clear();
+			if (((cbSendTo.SelectedIndex == 1) || (cbSendTo.SelectedIndex == 2)) && !m_com.IsOpen)
+			{
+				MessageBox.Show("Nextion device is not connected".Translate());
+			}
+			if (tbManualCommand.Lines.Length > 0)
+				for (int i = 0; i < tbManualCommand.Lines.Length; i++)
+					if (tbManualCommand.Lines[i].Trim().Length > 0)
+						sendCode(tbManualCommand.Lines[i].Trim());
+		}
+		#endregion
+
+		#region sendProcess
+		private void sendProcess()
+		{
+			Random random = new Random();
+			List<int> curve = new List<int>();
+			int idxCurve = 0;
+			int sendedToSim = 0;
+			Utility.GetCurve(m_curveAmplitude, m_curveOffset, ref curve);
+
+			while (m_stopSend == 1)
+			{
+				try
+				{
+					Application.DoEvents();
+					ms_interval = Utility.GetInt(tbInterval.Text.Trim());
+
+					sendedToSim = 0;
+					for (int idxChannel = 0; idxChannel < 4; idxChannel++)
+						if (m_channelId[idxChannel] < 4)
+						{
+							byte num2;
+							if (cbRandom.Checked)
+								num2 = (byte)random.Next(int.Parse(tbMinValue.Text), int.Parse(tbMaxValue.Text));
+							else if ((idxCurve + 16 * idxChannel) >= curve.Count)
+							{
+								int num5 = idxCurve + 16 * idxChannel;
+								while (num5 >= curve.Count)
+									num5 -= curve.Count;
+								num2 = (byte)curve[num5];
+							}
+							else
+								num2 = (byte)curve[idxCurve + (16 * idxChannel)];
+
+							string cmd = "add " + tbComponentId.Text + ","
+										+ m_channelId[idxChannel].ToString() + ","
+										+ num2.ToString();
+							if (m_curveSendSim)
+							{
+								sendSim(cmd);
+								sendedToSim += cmd.Length;
+							}
+							if (m_curveSendCom && m_com.IsOpen)
+							{
+								m_com.SendStringEnd(cmd);
+								sendedToSim = 0;
+							}
+						}
+
+					int ms_count = 0;
+					while (ms_count < ms_interval)
+					{
+						Thread.Sleep(1);
+						Application.DoEvents();
+						if (m_stopSend != 1)
+							break;
+						ms_count++;
+					}
+
+					for (ms_count = 0; ms_count < sendedToSim; ms_count++)
+					{
+						Thread.Sleep(1);
+						Application.DoEvents();
+						if (m_stopSend != 1)
+							break;
+					}
+
+					idxCurve++;
+					if (idxCurve == curve.Count)
+						idxCurve = 0;
+				}
+				catch (Exception ex)
+				{
+					MessageBox.Show(ex.Message);
+					m_stopSend = 1;
+					while (m_stopSend == 1)
+						Application.DoEvents();
+				}
+			}
+			m_stopSend = 0;
+		}
+		#endregion
+
+		#region stopSend
+		private void stopSend()
+		{
+			if (m_send_thread != null && m_send_thread.IsAlive)
+			{
+				m_stopSend = 2;
+				while (m_stopSend != 0)
+				{
+					Application.DoEvents();
+				}
+			}
+
+			tbInterval.Enabled = true;
+			tbChannel.Enabled = true;
+			tbComponentId.Enabled = true;
+			tbMinValue.Enabled = true;
+			tbMaxValue.Enabled = true;
+			btnSend.Text = "Send".Translate();
+			miConnect.Enabled = true;
+			cbSendTo.Enabled = true;
+			cbSendToCom.Enabled = true;
+		}
+		#endregion
+
+		#region tbManualCommand_KeyPress
+		private void tbManualCommand_KeyPress(object sender, KeyPressEventArgs e)
+		{
+			int keyChar = e.KeyChar;
+			if (cbPressEnter.Checked && keyChar == 13)
+			{
+				if (!m_com.IsOpen && (cbSendTo.SelectedIndex == 1 || cbSendTo.SelectedIndex == 2))
+					MessageBox.Show("Nextion device is not connected".Translate());
+				else if (tbManualCommand.Lines.Length > 0)
+					for (int i = tbManualCommand.Lines.Length - 1; i >= 0; i--)
+						if (tbManualCommand.Lines[i].Length > 2)
+						{
+							sendCode(tbManualCommand.Lines[i]);
+							break;
+						}
+			}
+		}
+		#endregion
+
+		#region sendCode
+		private void sendCode(string j)
+		{
+			if (cbSendTo.SelectedIndex == 0 || cbSendTo.SelectedIndex == 2)
+				sendSim(j);
+			if (cbSendTo.SelectedIndex == 1 || cbSendTo.SelectedIndex == 2)
+				m_com.SendStringEnd(j);
+		}
+		#endregion
+
+		#region sendSim
+		private void sendSim(string cmd)
+		{
+			if (ucRunScreen.InvokeRequired)
+				ucRunScreen.Invoke(new Action<string>(sendSim), cmd);
+			else
+			{
+				cmd = cmd.Trim();
+				if (cmd.Length > 2)
+				{
+					byte[] cmdBytes = cmd.ToBytes();
+					for (int i = 0; i < cmdBytes.Length; i++)
+						ucRunScreen.SendComData(cmdBytes[i]);
+
+					ucRunScreen.SendComData(0xff);
+					ucRunScreen.SendComData(0xff);
+					ucRunScreen.SendComData(0xff);
+				}
+			}
+		}
+		#endregion
+
+		#region addToSimResponse
+		/// <summary>
+		/// Add response to SIM Responses list
+		/// </summary>
+		/// <param name="response"></param>
+		private void addToSimResponse(string response)
+		{
+			if (lblSimResponses.InvokeRequired)
+				lblSimResponses.Invoke(new Action<string>(addToSimResponse), response);
+			else
+			{
+				lblSimResponses.Items.Add(response);
+				lblSimResponses.SelectedIndex = lblSimResponses.Items.Count - 1;
+			}
+		}
+		#endregion
+
+		#region addMcuResponse
+		/// <summary>
+		/// Add response to MCU Responses list
+		/// </summary>
+		/// <param name="response"></param>
+		private void addMcuResponse(string response)
+		{
+			if (lblSimResponses.InvokeRequired)
+				lblSimResponses.Invoke(new Action<string>(addMcuResponse), response);
+			else
+			{
+				lblMcuResponses.Items.Add(response);
+				lblMcuResponses.SelectedIndex = lblMcuResponses.Items.Count - 1;
+			}
+		}
+		#endregion
+
+		#region tbInterval_TextChanged
+		private void tbInterval_TextChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				ms_interval = int.Parse(tbInterval.Text);
+				if (ms_interval > 1000)
+				{
+					tbInterval.Text = "1000";
+					ms_interval = 1000;
+				}
+			}
+			catch { }
+		}
+		#endregion
+
+		#region tbChannel_TextChanged
+		private void tbChannel_TextChanged(object sender, EventArgs e)
+		{
+			setChannel();
+		}
+		#endregion
+
+		#region timerMcuRead_Tick
+		private void timerMcuRead_Tick(object sender, EventArgs e)
+		{
+			string str;
+			int data;
+			timerMcuRead.Enabled = false;
+			if (m_com.IsOpen)
+			{
+				while (m_com.BytesToRead > 0)
+				{
+					m_ms_lastMcuReceive = 0;
+					data = m_com.ReadByte();
+					if (m_enableMcuReceive)
+						ucRunScreen.SendComData((byte)data);
+					if (data == 0xFF)
+						m_counter_0xFF++;
+					else
+						m_counter_0xFF = 0;
+
+					str = data.ToString("X2");
+					m_receivedMcuData = m_receivedMcuData + " 0x" + str;
+					
+					if (m_counter_0xFF > 2)
+					{	// More than 2 0xFF means end of package
+						addMcuResponse(m_receivedMcuData.Trim());
+						m_receivedMcuData = "";
+						m_counter_0xFF = 0;
+					}
+				}
+			}
+			timerMcuRead.Enabled = true;
+		}
+		#endregion
+
+		#region timerSimMcuLog_Tick 300 ms
+		private void timerSimMcuLog_Tick(object sender, EventArgs e)
+		{
+			TimerCom.Enabled = false;
+			if (m_ms_lastSimReceive > 300)
+			{
+				if (!string.IsNullOrEmpty(m_receivedSimData))
+				{
+					m_ddx = 0;
+					addToSimResponse(m_receivedSimData.Trim());
+					m_receivedSimData = "";
+					m_ms_lastSimReceive = 0;
+				}
+			}
+			else
+				m_ms_lastSimReceive += TimerCom.Interval;
+
+			if (m_ms_lastMcuReceive > 300)
+			{
+				if (!string.IsNullOrEmpty(m_receivedMcuData))
+				{
+					addMcuResponse(m_receivedMcuData.Trim());
+					m_receivedMcuData = "";
+					m_counter_0xFF = 0;
+					m_ms_lastMcuReceive = 0;
+				}
+			}
+			else
+				m_ms_lastMcuReceive += TimerCom.Interval;
+			
+			TimerCom.Enabled = true;
+		}
+		#endregion
+
+		#region miUpload_Click
+		private void miUpload_Click(object sender, EventArgs e)
+		{
+			bool flag = false;
+			stopSend();
+			if (m_com.IsOpen)
+			{
+				flag = true;
+				closeLink();
+			}
+			new FirmwareUpload(m_binPath).ShowDialog();
+			if (flag)
+			{
+				miConnect.Enabled = false;
+				miUpload.Enabled = false;
+				openMcuLink();
+				miConnect.Enabled = true;
+				miUpload.Enabled = true;
+			}
+		}
+		#endregion
+
+		#region miXY_Click
+		private void miXY_Click(object sender, EventArgs e)
+		{
+			m_showXY = !m_showXY;
+			panelDisplay.Refresh();
+		}
+		#endregion
+
+		#region miConnect_Click
+		private void miConnect_Click(object sender, EventArgs e)
+		{
+			miConnect.Enabled = false;
+			miUpload.Enabled = false;
+			try
+			{
+				if (miConnect.Text == "Disconnect".Translate())
+					closeLink();
+				else
+					openMcuLink();
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show(ex.Message);
+			}
+			miConnect.Enabled = true;
+			miUpload.Enabled = true;
+		}
+		#endregion
+
 		#region InitializeComponent
 		protected override void Dispose(bool disposing)
 		{
@@ -348,24 +982,22 @@ namespace NextionEditor
 			this.m_com = new System.IO.Ports.SerialPort(this.components);
 			this.timerMcuRead = new System.Windows.Forms.Timer(this.components);
 			this.toolStrip = new System.Windows.Forms.ToolStrip();
-			this.mi_Upload = new System.Windows.Forms.ToolStripButton();
-			this.mi_SendCommandTo = new System.Windows.Forms.ToolStripLabel();
-			this.SendTo = new System.Windows.Forms.ToolStripComboBox();
-			this.lbl_ComPort = new System.Windows.Forms.ToolStripLabel();
-			this.SendToCom = new System.Windows.Forms.ToolStripComboBox();
-			this.mi_Connect = new System.Windows.Forms.ToolStripButton();
-			this.mi_XY = new System.Windows.Forms.ToolStripButton();
+			this.miUpload = new System.Windows.Forms.ToolStripButton();
+			this.miSendCommandTo = new System.Windows.Forms.ToolStripLabel();
+			this.cbSendTo = new System.Windows.Forms.ToolStripComboBox();
+			this.lblComPort = new System.Windows.Forms.ToolStripLabel();
+			this.cbSendToCom = new System.Windows.Forms.ToolStripComboBox();
+			this.miConnect = new System.Windows.Forms.ToolStripButton();
+			this.miXY = new System.Windows.Forms.ToolStripButton();
 			this.statusStrip = new System.Windows.Forms.StatusStrip();
-			this.lbl_statusText = new System.Windows.Forms.ToolStripStatusLabel();
-			this.link_RunAll = new System.Windows.Forms.LinkLabel();
-			this.link_SimClear = new System.Windows.Forms.LinkLabel();
-			this.lb_SimResponses = new System.Windows.Forms.ListBox();
-			this.lb_McuResponses = new System.Windows.Forms.ListBox();
-			this.lbl_SimParse = new System.Windows.Forms.Label();
-			this.lbl_McuParse = new System.Windows.Forms.Label();
-			this.link_McuClear = new System.Windows.Forms.LinkLabel();
-			this.lb_Log = new System.Windows.Forms.ListBox();
-			this.btnClearLog = new System.Windows.Forms.Button();
+			this.lblstatusText = new System.Windows.Forms.ToolStripStatusLabel();
+			this.linkRunAll = new System.Windows.Forms.LinkLabel();
+			this.linkSimClear = new System.Windows.Forms.LinkLabel();
+			this.lblSimResponses = new System.Windows.Forms.ListBox();
+			this.lblMcuResponses = new System.Windows.Forms.ListBox();
+			this.lblSimParse = new System.Windows.Forms.Label();
+			this.lblMcuParse = new System.Windows.Forms.Label();
+			this.linkMcuClear = new System.Windows.Forms.LinkLabel();
 			this.panelDisplay = new System.Windows.Forms.Panel();
 			this.ucRunScreen = new NextionEditor.HmiRunScreen();
 			this.rbKeyboardInput = new System.Windows.Forms.RadioButton();
@@ -375,7 +1007,7 @@ namespace NextionEditor
 			this.cbComPorts = new System.Windows.Forms.ComboBox();
 			this.cbBaudRates = new System.Windows.Forms.ComboBox();
 			this.label8 = new System.Windows.Forms.Label();
-			this.link_Start = new System.Windows.Forms.LinkLabel();
+			this.linkStart = new System.Windows.Forms.LinkLabel();
 			this.btnSend = new System.Windows.Forms.Button();
 			this.label9 = new System.Windows.Forms.Label();
 			this.tbInterval = new System.Windows.Forms.TextBox();
@@ -478,203 +1110,180 @@ namespace NextionEditor
 			// toolStrip
 			// 
 			this.toolStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.mi_Upload,
-            this.mi_SendCommandTo,
-            this.SendTo,
-            this.lbl_ComPort,
-            this.SendToCom,
-            this.mi_Connect,
-            this.mi_XY});
+            this.miUpload,
+            this.miSendCommandTo,
+            this.cbSendTo,
+            this.lblComPort,
+            this.cbSendToCom,
+            this.miConnect,
+            this.miXY});
 			this.toolStrip.Location = new System.Drawing.Point(0, 0);
 			this.toolStrip.Name = "toolStrip";
-			this.toolStrip.Size = new System.Drawing.Size(1016, 29);
+			this.toolStrip.Size = new System.Drawing.Size(1016, 25);
 			this.toolStrip.TabIndex = 168;
 			this.toolStrip.Text = "toolStrip1";
 			// 
-			// mi_Upload
+			// miUpload
 			// 
-			this.mi_Upload.Image = ((System.Drawing.Image)(resources.GetObject("mi_Upload.Image")));
-			this.mi_Upload.ImageTransparentColor = System.Drawing.Color.Magenta;
-			this.mi_Upload.Name = "mi_Upload";
-			this.mi_Upload.Size = new System.Drawing.Size(156, 26);
-			this.mi_Upload.Text = "Upload to Nextion";
-			this.mi_Upload.Click += new System.EventHandler(this.miUpload_Click);
+			this.miUpload.Image = ((System.Drawing.Image)(resources.GetObject("miUpload.Image")));
+			this.miUpload.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this.miUpload.Name = "miUpload";
+			this.miUpload.Size = new System.Drawing.Size(123, 22);
+			this.miUpload.Text = "Upload to Nextion";
+			this.miUpload.Click += new System.EventHandler(this.miUpload_Click);
 			// 
-			// mi_SendCommandTo
+			// miSendCommandTo
 			// 
-			this.mi_SendCommandTo.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-			this.mi_SendCommandTo.Image = ((System.Drawing.Image)(resources.GetObject("mi_SendCommandTo.Image")));
-			this.mi_SendCommandTo.ImageTransparentColor = System.Drawing.Color.Magenta;
-			this.mi_SendCommandTo.Name = "mi_SendCommandTo";
-			this.mi_SendCommandTo.Size = new System.Drawing.Size(140, 26);
-			this.mi_SendCommandTo.Text = "Send command to:";
+			this.miSendCommandTo.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+			this.miSendCommandTo.Image = ((System.Drawing.Image)(resources.GetObject("miSendCommandTo.Image")));
+			this.miSendCommandTo.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this.miSendCommandTo.Name = "miSendCommandTo";
+			this.miSendCommandTo.Size = new System.Drawing.Size(108, 22);
+			this.miSendCommandTo.Text = "Send command to:";
 			// 
-			// SendTo
+			// cbSendTo
 			// 
-			this.SendTo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-			this.SendTo.Name = "SendTo";
-			this.SendTo.Size = new System.Drawing.Size(190, 29);
-			this.SendTo.SelectedIndexChanged += new System.EventHandler(this.SendTo_SelectedIndexChanged);
+			this.cbSendTo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cbSendTo.Name = "cbSendTo";
+			this.cbSendTo.Size = new System.Drawing.Size(190, 25);
+			this.cbSendTo.SelectedIndexChanged += new System.EventHandler(this.SendTo_SelectedIndexChanged);
 			// 
-			// lbl_ComPort
+			// lblComPort
 			// 
-			this.lbl_ComPort.Name = "lbl_ComPort";
-			this.lbl_ComPort.Size = new System.Drawing.Size(78, 26);
-			this.lbl_ComPort.Text = "Com Port:";
+			this.lblComPort.Name = "lblComPort";
+			this.lblComPort.Size = new System.Drawing.Size(61, 22);
+			this.lblComPort.Text = "Com Port:";
 			// 
-			// SendToCom
+			// cbSendToCom
 			// 
-			this.SendToCom.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-			this.SendToCom.Name = "SendToCom";
-			this.SendToCom.Size = new System.Drawing.Size(121, 29);
+			this.cbSendToCom.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cbSendToCom.Name = "cbSendToCom";
+			this.cbSendToCom.Size = new System.Drawing.Size(121, 25);
 			// 
-			// mi_Connect
+			// miConnect
 			// 
-			this.mi_Connect.Image = global::NextionEditor.Properties.Resources.glzy8_com_148;
-			this.mi_Connect.ImageTransparentColor = System.Drawing.Color.Magenta;
-			this.mi_Connect.Name = "mi_Connect";
-			this.mi_Connect.Size = new System.Drawing.Size(87, 26);
-			this.mi_Connect.Text = "Connect";
-			this.mi_Connect.Click += new System.EventHandler(this.miConnect_Click);
+			this.miConnect.Image = global::NextionEditor.Properties.Resources.glzy8_com_148;
+			this.miConnect.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this.miConnect.Name = "miConnect";
+			this.miConnect.Size = new System.Drawing.Size(72, 22);
+			this.miConnect.Text = "Connect";
+			this.miConnect.Click += new System.EventHandler(this.miConnect_Click);
 			// 
-			// mi_XY
+			// miXY
 			// 
-			this.mi_XY.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-			this.mi_XY.Image = ((System.Drawing.Image)(resources.GetObject("mi_XY.Image")));
-			this.mi_XY.ImageTransparentColor = System.Drawing.Color.Magenta;
-			this.mi_XY.Name = "mi_XY";
-			this.mi_XY.Size = new System.Drawing.Size(32, 26);
-			this.mi_XY.Text = "XY";
-			this.mi_XY.Click += new System.EventHandler(this.miXY_Click);
+			this.miXY.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+			this.miXY.Image = ((System.Drawing.Image)(resources.GetObject("miXY.Image")));
+			this.miXY.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this.miXY.Name = "miXY";
+			this.miXY.Size = new System.Drawing.Size(25, 22);
+			this.miXY.Text = "XY";
+			this.miXY.Click += new System.EventHandler(this.miXY_Click);
 			// 
 			// statusStrip
 			// 
 			this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.lbl_statusText});
-			this.statusStrip.Location = new System.Drawing.Point(0, 766);
+            this.lblstatusText});
+			this.statusStrip.Location = new System.Drawing.Point(0, 770);
 			this.statusStrip.Name = "statusStrip";
-			this.statusStrip.Size = new System.Drawing.Size(1016, 26);
+			this.statusStrip.Size = new System.Drawing.Size(1016, 22);
 			this.statusStrip.TabIndex = 169;
 			this.statusStrip.Text = "statusStrip1";
 			// 
-			// lbl_statusText
+			// lblstatusText
 			// 
-			this.lbl_statusText.Name = "lbl_statusText";
-			this.lbl_statusText.Size = new System.Drawing.Size(1001, 21);
-			this.lbl_statusText.Spring = true;
-			this.lbl_statusText.Text = "Nextion state: Disconnected";
-			this.lbl_statusText.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			this.lblstatusText.Name = "lblstatusText";
+			this.lblstatusText.Size = new System.Drawing.Size(1001, 17);
+			this.lblstatusText.Spring = true;
+			this.lblstatusText.Text = "Nextion state: Disconnected";
+			this.lblstatusText.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			// 
-			// link_RunAll
+			// linkRunAll
 			// 
-			this.link_RunAll.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.link_RunAll.Location = new System.Drawing.Point(332, 705);
-			this.link_RunAll.Name = "link_RunAll";
-			this.link_RunAll.Size = new System.Drawing.Size(119, 17);
-			this.link_RunAll.TabIndex = 171;
-			this.link_RunAll.TabStop = true;
-			this.link_RunAll.Text = "Run all commands";
-			this.link_RunAll.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-			this.link_RunAll.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkRunAll_LinkClicked);
+			this.linkRunAll.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.linkRunAll.Location = new System.Drawing.Point(332, 705);
+			this.linkRunAll.Name = "linkRunAll";
+			this.linkRunAll.Size = new System.Drawing.Size(119, 17);
+			this.linkRunAll.TabIndex = 171;
+			this.linkRunAll.TabStop = true;
+			this.linkRunAll.Text = "Run all commands";
+			this.linkRunAll.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+			this.linkRunAll.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkRunAll_LinkClicked);
 			// 
-			// link_SimClear
+			// linkSimClear
 			// 
-			this.link_SimClear.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.link_SimClear.AutoSize = true;
-			this.link_SimClear.Location = new System.Drawing.Point(698, 570);
-			this.link_SimClear.Name = "link_SimClear";
-			this.link_SimClear.Size = new System.Drawing.Size(38, 17);
-			this.link_SimClear.TabIndex = 172;
-			this.link_SimClear.TabStop = true;
-			this.link_SimClear.Text = "Clear";
-			this.link_SimClear.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkSimRespClear_LinkClicked);
+			this.linkSimClear.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.linkSimClear.AutoSize = true;
+			this.linkSimClear.Location = new System.Drawing.Point(698, 570);
+			this.linkSimClear.Name = "linkSimClear";
+			this.linkSimClear.Size = new System.Drawing.Size(38, 17);
+			this.linkSimClear.TabIndex = 172;
+			this.linkSimClear.TabStop = true;
+			this.linkSimClear.Text = "Clear";
+			this.linkSimClear.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkSimRespClear_LinkClicked);
 			// 
-			// lb_SimResponses
+			// lblSimResponses
 			// 
-			this.lb_SimResponses.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.lb_SimResponses.FormattingEnabled = true;
-			this.lb_SimResponses.HorizontalScrollbar = true;
-			this.lb_SimResponses.ItemHeight = 17;
-			this.lb_SimResponses.Location = new System.Drawing.Point(471, 594);
-			this.lb_SimResponses.Name = "lb_SimResponses";
-			this.lb_SimResponses.Size = new System.Drawing.Size(265, 89);
-			this.lb_SimResponses.TabIndex = 173;
-			this.lb_SimResponses.SelectedIndexChanged += new System.EventHandler(this.listSimResponses_SelectedIndexChanged);
-			this.lb_SimResponses.DoubleClick += new System.EventHandler(this.listSimResponses_DoubleClick);
+			this.lblSimResponses.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.lblSimResponses.FormattingEnabled = true;
+			this.lblSimResponses.HorizontalScrollbar = true;
+			this.lblSimResponses.ItemHeight = 17;
+			this.lblSimResponses.Location = new System.Drawing.Point(471, 594);
+			this.lblSimResponses.Name = "lblSimResponses";
+			this.lblSimResponses.Size = new System.Drawing.Size(265, 89);
+			this.lblSimResponses.TabIndex = 173;
+			this.lblSimResponses.SelectedIndexChanged += new System.EventHandler(this.listSimResponses_SelectedIndexChanged);
+			this.lblSimResponses.DoubleClick += new System.EventHandler(this.listSimResponses_DoubleClick);
 			// 
-			// lb_McuResponses
+			// lblMcuResponses
 			// 
-			this.lb_McuResponses.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.lb_McuResponses.FormattingEnabled = true;
-			this.lb_McuResponses.HorizontalScrollbar = true;
-			this.lb_McuResponses.ItemHeight = 17;
-			this.lb_McuResponses.Location = new System.Drawing.Point(742, 594);
-			this.lb_McuResponses.Name = "lb_McuResponses";
-			this.lb_McuResponses.Size = new System.Drawing.Size(265, 89);
-			this.lb_McuResponses.TabIndex = 174;
-			this.lb_McuResponses.SelectedIndexChanged += new System.EventHandler(this.listMcuResponses_SelectedIndexChanged);
-			this.lb_McuResponses.DoubleClick += new System.EventHandler(this.listMcuResponses_DoubleClick);
+			this.lblMcuResponses.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.lblMcuResponses.FormattingEnabled = true;
+			this.lblMcuResponses.HorizontalScrollbar = true;
+			this.lblMcuResponses.ItemHeight = 17;
+			this.lblMcuResponses.Location = new System.Drawing.Point(742, 594);
+			this.lblMcuResponses.Name = "lblMcuResponses";
+			this.lblMcuResponses.Size = new System.Drawing.Size(265, 89);
+			this.lblMcuResponses.TabIndex = 174;
+			this.lblMcuResponses.SelectedIndexChanged += new System.EventHandler(this.listMcuResponses_SelectedIndexChanged);
+			this.lblMcuResponses.DoubleClick += new System.EventHandler(this.listMcuResponses_DoubleClick);
 			// 
-			// lbl_SimParse
+			// lblSimParse
 			// 
-			this.lbl_SimParse.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.lbl_SimParse.Location = new System.Drawing.Point(469, 690);
-			this.lbl_SimParse.Name = "lbl_SimParse";
-			this.lbl_SimParse.Size = new System.Drawing.Size(267, 31);
-			this.lbl_SimParse.TabIndex = 175;
-			this.lbl_SimParse.Text = "Parse:";
+			this.lblSimParse.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.lblSimParse.Location = new System.Drawing.Point(469, 690);
+			this.lblSimParse.Name = "lblSimParse";
+			this.lblSimParse.Size = new System.Drawing.Size(267, 31);
+			this.lblSimParse.TabIndex = 175;
+			this.lblSimParse.Text = "Parse:";
 			// 
-			// lbl_McuParse
+			// lblMcuParse
 			// 
-			this.lbl_McuParse.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.lbl_McuParse.Location = new System.Drawing.Point(742, 690);
-			this.lbl_McuParse.Name = "lbl_McuParse";
-			this.lbl_McuParse.Size = new System.Drawing.Size(265, 31);
-			this.lbl_McuParse.TabIndex = 176;
-			this.lbl_McuParse.Text = "Parse:";
+			this.lblMcuParse.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.lblMcuParse.Location = new System.Drawing.Point(742, 690);
+			this.lblMcuParse.Name = "lblMcuParse";
+			this.lblMcuParse.Size = new System.Drawing.Size(265, 31);
+			this.lblMcuParse.TabIndex = 176;
+			this.lblMcuParse.Text = "Parse:";
 			// 
-			// link_McuClear
+			// linkMcuClear
 			// 
-			this.link_McuClear.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.link_McuClear.AutoSize = true;
-			this.link_McuClear.Location = new System.Drawing.Point(966, 570);
-			this.link_McuClear.Name = "link_McuClear";
-			this.link_McuClear.Size = new System.Drawing.Size(38, 17);
-			this.link_McuClear.TabIndex = 177;
-			this.link_McuClear.TabStop = true;
-			this.link_McuClear.Text = "Clear";
-			this.link_McuClear.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.McuRespClear_LinkClicked);
-			// 
-			// lb_Log
-			// 
-			this.lb_Log.FormattingEnabled = true;
-			this.lb_Log.ItemHeight = 17;
-			this.lb_Log.Location = new System.Drawing.Point(653, 2);
-			this.lb_Log.Name = "lb_Log";
-			this.lb_Log.Size = new System.Drawing.Size(352, 123);
-			this.lb_Log.TabIndex = 178;
-			this.lb_Log.Visible = false;
-			// 
-			// btnClearLog
-			// 
-			this.btnClearLog.Location = new System.Drawing.Point(895, 102);
-			this.btnClearLog.Name = "btnClearLog";
-			this.btnClearLog.Size = new System.Drawing.Size(110, 35);
-			this.btnClearLog.TabIndex = 179;
-			this.btnClearLog.Text = "button1";
-			this.btnClearLog.UseVisualStyleBackColor = true;
-			this.btnClearLog.Visible = false;
-			this.btnClearLog.Click += new System.EventHandler(this.btnClearLog_Click);
+			this.linkMcuClear.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.linkMcuClear.AutoSize = true;
+			this.linkMcuClear.Location = new System.Drawing.Point(966, 570);
+			this.linkMcuClear.Name = "linkMcuClear";
+			this.linkMcuClear.Size = new System.Drawing.Size(38, 17);
+			this.linkMcuClear.TabIndex = 177;
+			this.linkMcuClear.TabStop = true;
+			this.linkMcuClear.Text = "Clear";
+			this.linkMcuClear.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.McuRespClear_LinkClicked);
 			// 
 			// panelDisplay
 			// 
-			this.panelDisplay.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+			this.panelDisplay.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+			| System.Windows.Forms.AnchorStyles.Left)
+			| System.Windows.Forms.AnchorStyles.Right)));
 			this.panelDisplay.AutoScroll = true;
 			this.panelDisplay.BackColor = System.Drawing.Color.Gray;
-			this.panelDisplay.Controls.Add(this.btnClearLog);
-			this.panelDisplay.Controls.Add(this.lb_Log);
 			this.panelDisplay.Controls.Add(this.ucRunScreen);
 			this.panelDisplay.Location = new System.Drawing.Point(0, 30);
 			this.panelDisplay.Name = "panelDisplay";
@@ -687,12 +1296,12 @@ namespace NextionEditor
 			// 
 			this.ucRunScreen.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
 			this.ucRunScreen.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-			this.ucRunScreen.Location = new System.Drawing.Point(50, 62);
+			this.ucRunScreen.Location = new System.Drawing.Point(54, 50);
 			this.ucRunScreen.Name = "ucRunScreen";
 			this.ucRunScreen.Size = new System.Drawing.Size(100, 100);
 			this.ucRunScreen.TabIndex = 0;
 			this.ucRunScreen.SendByte += new System.EventHandler(this.ucRunScreen_SendByte);
-			this.ucRunScreen.SendRunCode += new System.EventHandler(this.ucRunScreen_SendRunCode);
+			this.ucRunScreen.SendRunCode += new NextionEditor.HmiRunScreen.SendRunCodeHandler(this.ucRunScreen_SendRunCode);
 			this.ucRunScreen.Resize += new System.EventHandler(this.ucRunScreen_Resize);
 			// 
 			// rbKeyboardInput
@@ -775,18 +1384,18 @@ namespace NextionEditor
 			this.label8.Text = "Baud";
 			this.label8.Visible = false;
 			// 
-			// link_Start
+			// linkStart
 			// 
-			this.link_Start.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.link_Start.AutoSize = true;
-			this.link_Start.Location = new System.Drawing.Point(831, 731);
-			this.link_Start.Name = "link_Start";
-			this.link_Start.Size = new System.Drawing.Size(35, 17);
-			this.link_Start.TabIndex = 187;
-			this.link_Start.TabStop = true;
-			this.link_Start.Text = "Start";
-			this.link_Start.Visible = false;
-			this.link_Start.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkStart_LinkClicked);
+			this.linkStart.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.linkStart.AutoSize = true;
+			this.linkStart.Location = new System.Drawing.Point(831, 731);
+			this.linkStart.Name = "linkStart";
+			this.linkStart.Size = new System.Drawing.Size(35, 17);
+			this.linkStart.TabIndex = 187;
+			this.linkStart.TabStop = true;
+			this.linkStart.Text = "Start";
+			this.linkStart.Visible = false;
+			this.linkStart.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkStart_LinkClicked);
 			// 
 			// btnSend
 			// 
@@ -959,19 +1568,19 @@ namespace NextionEditor
 			this.Controls.Add(this.cbPressEnter);
 			this.Controls.Add(this.panel2);
 			this.Controls.Add(this.linkWaveform);
-			this.Controls.Add(this.link_Start);
+			this.Controls.Add(this.linkStart);
 			this.Controls.Add(this.cbBaudRates);
 			this.Controls.Add(this.label8);
 			this.Controls.Add(this.cbComPorts);
 			this.Controls.Add(this.label7);
 			this.Controls.Add(this.panelDisplay);
-			this.Controls.Add(this.link_McuClear);
-			this.Controls.Add(this.lbl_McuParse);
-			this.Controls.Add(this.lbl_SimParse);
-			this.Controls.Add(this.lb_McuResponses);
-			this.Controls.Add(this.lb_SimResponses);
-			this.Controls.Add(this.link_SimClear);
-			this.Controls.Add(this.link_RunAll);
+			this.Controls.Add(this.linkMcuClear);
+			this.Controls.Add(this.lblMcuParse);
+			this.Controls.Add(this.lblSimParse);
+			this.Controls.Add(this.lblMcuResponses);
+			this.Controls.Add(this.lblSimResponses);
+			this.Controls.Add(this.linkSimClear);
+			this.Controls.Add(this.linkRunAll);
 			this.Controls.Add(this.toolStrip);
 			this.Controls.Add(this.label3);
 			this.Controls.Add(this.label2);
@@ -1000,670 +1609,6 @@ namespace NextionEditor
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
-		}
-		#endregion
-
-		#region linkRunAll_LinkClicked
-		private void linkRunAll_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-		{
-			sendAll();
-		}
-		#endregion
-
-		#region linkSimRespClear_LinkClicked
-		private void linkSimRespClear_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-		{
-			lb_SimResponses.Items.Clear();
-		}
-		#endregion
-
-		#region McuRespClear_LinkClicked
-		private void McuRespClear_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-		{
-			lb_McuResponses.Items.Clear();
-		}
-		#endregion
-
-		#region WaveformGererator_LinkClicked
-		private void WaveformGererator_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-		{
-			if (!panel2.Visible)
-				panel2.Visible = true;
-			else
-			{
-				stopSend();
-				panel2.Visible = false;
-			}
-		}
-		#endregion
-
-		#region listSimResponses_DoubleClick
-		private void listSimResponses_DoubleClick(object sender, EventArgs e)
-		{
-			try
-			{
-				Clipboard.SetDataObject(lb_SimResponses.SelectedItem.ToString());
-			}
-			catch { }
-		}
-		#endregion
-
-		#region showError
-		private void showError(Label label, string response)
-		{
-			label.Text = "Meaning:".Translate() + Utility.GetErrorText(response);
-
-			int num = Convert.ToInt32(response.Split(Utility.CHAR_SPACE)[0], 16);
-			if (num == 0 || (num > 1 && num < 0x65))
-				label.ForeColor = Color.Red;
-			else
-				label.ForeColor = Color.Black;
-		}
-		#endregion
-
-		#region listSimResponses_SelectedIndexChanged
-		private void listSimResponses_SelectedIndexChanged(object sender, EventArgs e)
-		{
-			if (lb_SimResponses.Items.Count > 0 && lb_SimResponses.SelectedIndex >= 0)
-				showError(lbl_SimParse, lb_SimResponses.SelectedItem.ToString());
-		}
-		#endregion
-
-		#region listMcuResponses_SelectedIndexChanged
-		private void listMcuResponses_SelectedIndexChanged(object sender, EventArgs e)
-		{
-			if (lb_McuResponses.Items.Count > 0 && lb_McuResponses.SelectedIndex >= 0)
-				showError(lbl_McuParse, lb_McuResponses.SelectedItem.ToString());
-		}
-		#endregion
-
-		#region McuResponses_DoubleClick
-		private void listMcuResponses_DoubleClick(object sender, EventArgs e)
-		{
-			try
-			{
-				Clipboard.SetDataObject(lb_McuResponses.SelectedItem.ToString());
-			}
-			catch { }
-		}
-		#endregion
-
-		#region openMcuLink
-		private void openMcuLink()
-		{
-			string status = string.Empty;
-			if (m_comMcu.GetDevicePort(ref status, SendToCom.Text, 0) == 1)
-			{
-				m_enableMcuReceive = false;
-				timerMcuRead.Enabled = true;
-				mi_Connect.Text = "Disconnect".Translate();
-			}
-			lbl_statusText.Text = status;
-		}
-		#endregion
-
-		#region panelDisplay_Paint
-		private void panelDisplay_Paint(object sender, PaintEventArgs e)
-		{
-			try
-			{
-				int offset = 7;
-				Pen pen = new Pen(Color.Yellow, 1f);
-				Graphics graphics = panelDisplay.CreateGraphics();
-				graphics.Clear(panelDisplay.BackColor);
-				if (ucRunScreen.Visible && m_showXY)
-				{
-					graphics.DrawString("(0,0)", new Font(Encoding.Default.EncodingName, 9f), new SolidBrush(Color.Yellow), (PointF)new Point((ucRunScreen.Left - offset) - 0x11, (ucRunScreen.Top - offset) - 15));
-					graphics.DrawString("X", new Font(Encoding.Default.EncodingName, 9f), new SolidBrush(Color.Yellow), (PointF)new Point((ucRunScreen.Left + (ucRunScreen.Width / 2)) - 5, (ucRunScreen.Top - offset) - 0x11));
-					graphics.DrawString("Y", new Font(Encoding.Default.EncodingName, 9f), new SolidBrush(Color.Yellow), (PointF)new Point(ucRunScreen.Left - 20, (ucRunScreen.Top + (ucRunScreen.Height / 2)) - 5));
-					graphics.DrawLine(pen, new Point(ucRunScreen.Left - offset, ucRunScreen.Top - offset), new Point(ucRunScreen.Left + ucRunScreen.Width, ucRunScreen.Top - offset));
-					graphics.DrawLine(pen, new Point((ucRunScreen.Left + ucRunScreen.Width) - 8, (ucRunScreen.Top - offset) - 4), new Point(ucRunScreen.Left + ucRunScreen.Width, ucRunScreen.Top - offset));
-					graphics.DrawLine(pen, new Point(ucRunScreen.Left - offset, ucRunScreen.Top - offset), new Point(ucRunScreen.Left - offset, ucRunScreen.Top + ucRunScreen.Height));
-					graphics.DrawLine(pen, new Point((ucRunScreen.Left - offset) - 4, (ucRunScreen.Top + ucRunScreen.Height) - 8), new Point(ucRunScreen.Left - offset, ucRunScreen.Top + ucRunScreen.Height));
-				}
-			}
-			catch { }
-		}
-		#endregion
-
-		#region panelDisplay_Resize
-		private void panelDisplay_Resize(object sender, EventArgs e)
-		{
-			resizeForm();
-		}
-		#endregion
-
-		#region rbKeyboardMcyInput_CheckedChanged
-		private void rbKeyboardMcyInput_CheckedChanged(object sender, EventArgs e)
-		{
-			link_RunAll.Visible =
-			SendTo.Enabled =
-			linkWaveform.Visible =
-			mi_Upload.Enabled = rbKeyboardInput.Checked;
-
-			link_Start.Visible =
-			label7.Visible =
-			label8.Visible =
-			cbComPorts.Visible =
-			cbBaudRates.Visible =
-			tbManualCommand.ReadOnly = rbMcuInput.Checked;
-
-			m_enableMcuReceive = !rbKeyboardInput.Checked;
-
-			if (rbKeyboardInput.Checked && m_com.IsOpen)
-			{
-				timerMcuRead.Enabled = false;
-				comClose();
-
-				link_Start.Text = "Start".Translate();
-				cbComPorts.Enabled = true;
-				cbBaudRates.Enabled = true;
-			}
-		}
-		#endregion
-
-		#region resizeForm
-		private void resizeForm()
-		{
-			try
-			{
-				ucRunScreen.Left = (panelDisplay.Width - ucRunScreen.Width) / 2;
-				ucRunScreen.Top = (panelDisplay.Height - ucRunScreen.Height) / 2;
-				if (ucRunScreen.Left < 25)
-					ucRunScreen.Left = 25;
-				if (ucRunScreen.Top < 25)
-					ucRunScreen.Top = 25;
-			}
-			catch { }
-		}
-		#endregion
-
-		#region SerialDebug_FormClosing
-		private void SerialDebug_FormClosing(object sender, FormClosingEventArgs e)
-		{
-			if (m_comMcu.RunState == 0)
-			{
-				m_comMcu.RunState = 2;
-				e.Cancel = true;
-			}
-			else
-			{
-				stopSend();
-				m_comMcu.ComClose();
-				ucRunScreen.RunStop();
-			}
-		}
-		#endregion
-
-		#region ucRunScreen_MouseWheel
-		private void ucRunScreen_MouseWheel(object sender, MouseEventArgs e)
-		{
-			if (ucRunScreen.Visible)
-			{
-				setZoomFactor(e.Delta);
-				((HandledMouseEventArgs)e).Handled = true;
-			}
-		}
-		private void setZoomFactor(int delta)
-		{
-			if (panelDisplay.InvokeRequired)
-				panelDisplay.Invoke(new Action<int>(setZoomFactor), delta);
-			else if (ucRunScreen.SetZoom(delta))
-			{
-				resizeForm();
-				panelDisplay.Refresh();
-			}
-		}
-		#endregion
-
-		#region SerialDebug_Load
-		private void SerialDebug_Load(object sender, EventArgs e)
-		{
-			base.Icon = HmiOptions.Icon;
-			Text = HmiOptions.SoftName;
-
-			//!!! wheel ucRunScreen.MouseWheel += new MouseEventHandler(ucRunScreen_MouseWheel);
-
-			m_channelId[0] = 0;
-			m_channelId[1] = 0xff;
-			m_channelId[2] = 0xff;
-			m_channelId[3] = 0xff;
-
-			cbBaudRates.Items.Clear();
-			cbBaudRates.Items.Add("2400");
-			cbBaudRates.Items.Add("4800");
-			cbBaudRates.Items.Add("9600");
-			cbBaudRates.Items.Add("19200");
-			cbBaudRates.Items.Add("38400");
-			cbBaudRates.Items.Add("57600");
-			cbBaudRates.Items.Add("115200");
-			cbBaudRates.Text = "9600";
-
-			SendToCom.Visible = false;
-			mi_Connect.Visible = false;
-			lbl_ComPort.Visible = false;
-			m_receivedMcuData = "";
-			SendTo.Items.Clear();
-			SendTo.Items.Add("Current Simulator".Translate());
-			SendTo.Items.Add("Nextion Device".Translate());
-			SendTo.Items.Add("Simulator and Nextion Device".Translate());
-			SendTo.SelectedIndex = 0;
-			getPorts();
-			m_comMcu.Port = m_com;
-		}
-		#endregion
-
-		#region ucRunScreen_Resize
-		private void ucRunScreen_Resize(object sender, EventArgs e)
-		{
-			resizeForm();
-		}
-		#endregion
-
-		#region ucRunScreen_SendRunCode
-		private void ucRunScreen_SendRunCode(object sender, EventArgs e)
-		{
-			addToLog((string)sender);
-		}
-		#endregion
-
-		#region ucRunScreen_SendByte
-		private void ucRunScreen_SendByte(object sender, EventArgs e)
-		{
-			m_ms_lastSimReceive = 0;
-			int num = (int)sender;
-			string str = Convert.ToString(num, 16);
-			if (str.Length == 1)
-				str = "0" + str;
-
-			m_receivedSimData = m_receivedSimData + "0x" + str + " ";
-			if (m_enableMcuReceive && m_com.IsOpen)
-			{
-				byte[] buffer = new byte[] { (byte)num };
-				m_com.Write(buffer, 0, 1);
-			}
-			if (str == "ff")
-				m_ddx++;
-			else
-				m_ddx = 0;
-
-			if (m_ddx >= 3)
-			{
-				m_ddx = 0;
-				addToSimResponse(m_receivedSimData.Trim());
-				m_receivedSimData = "";
-			}
-		}
-		#endregion
-
-		#region sendAll
-		private void sendAll()
-		{
-			lb_SimResponses.Items.Clear();
-			lb_McuResponses.Items.Clear();
-			if (((SendTo.SelectedIndex == 1) || (SendTo.SelectedIndex == 2)) && !m_com.IsOpen)
-			{
-				MessageBox.Show("Nextion device is not connected".Translate());
-			}
-			if (tbManualCommand.Lines.Length > 0)
-				for (int i = 0; i < tbManualCommand.Lines.Length; i++)
-					if (tbManualCommand.Lines[i].Trim().Length > 0)
-						sendCode(tbManualCommand.Lines[i].Trim());
-		}
-		#endregion
-
-		#region sendProcess
-		private void sendProcess()
-		{
-			Random random = new Random();
-			List<int> curve = new List<int>();
-			int idxCurve = 0;
-			int sendedToSim = 0;
-			Utility.GetCurve(m_curveAmplitude, m_curveOffset, ref curve);
-
-			while (m_stopSend == 1)
-			{
-				try
-				{
-					Application.DoEvents();
-					ms_interval = Utility.GetInt(tbInterval.Text.Trim());
-
-					sendedToSim = 0;
-					for (int idxChannel = 0; idxChannel < 4; idxChannel++)
-						if (m_channelId[idxChannel] < 4)
-						{
-							byte num2;
-							if (cbRandom.Checked)
-								num2 = (byte)random.Next(int.Parse(tbMinValue.Text), int.Parse(tbMaxValue.Text));
-							else if ((idxCurve + 16 * idxChannel) >= curve.Count)
-							{
-								int num5 = idxCurve + 16 * idxChannel;
-								while (num5 >= curve.Count)
-									num5 -= curve.Count;
-								num2 = (byte)curve[num5];
-							}
-							else
-								num2 = (byte)curve[idxCurve + (16 * idxChannel)];
-
-							string cmd = "add " + tbComponentId.Text + ","
-										+ m_channelId[idxChannel].ToString() + ","
-										+ num2.ToString();
-							if (m_curveSendSim)
-							{
-								sendSim(cmd);
-								sendedToSim += cmd.Length;
-							}
-							if (m_curveSendCom && m_com.IsOpen)
-							{
-								m_com.SendStringEnd(cmd);
-								sendedToSim = 0;
-							}
-						}
-
-					int ms_count = 0;
-					while (ms_count < ms_interval)
-					{
-						Thread.Sleep(1);
-						Application.DoEvents();
-						if (m_stopSend != 1)
-							break;
-						ms_count++;
-					}
-
-					for (ms_count = 0; ms_count < sendedToSim; ms_count++)
-					{
-						Thread.Sleep(1);
-						Application.DoEvents();
-						if (m_stopSend != 1)
-							break;
-					}
-
-					idxCurve++;
-					if (idxCurve == curve.Count)
-						idxCurve = 0;
-				}
-				catch (Exception ex)
-				{
-					MessageBox.Show(ex.Message);
-					m_stopSend = 1;
-					while (m_stopSend == 1)
-						Application.DoEvents();
-				}
-			}
-			m_stopSend = 0;
-		}
-		#endregion
-
-		#region stopSend
-		private void stopSend()
-		{
-			if (m_send_thread != null && m_send_thread.IsAlive)
-			{
-				m_stopSend = 2;
-				while (m_stopSend != 0)
-				{
-					Application.DoEvents();
-				}
-			}
-
-			tbInterval.Enabled = true;
-			tbChannel.Enabled = true;
-			tbComponentId.Enabled = true;
-			tbMinValue.Enabled = true;
-			tbMaxValue.Enabled = true;
-			btnSend.Text = "Send".Translate();
-			mi_Connect.Enabled = true;
-			SendTo.Enabled = true;
-			SendToCom.Enabled = true;
-		}
-		#endregion
-
-		#region tbManualCommand_KeyPress
-		private void tbManualCommand_KeyPress(object sender, KeyPressEventArgs e)
-		{
-			int keyChar = e.KeyChar;
-			if (cbPressEnter.Checked && keyChar == 13)
-			{
-				if (!m_com.IsOpen && (SendTo.SelectedIndex == 1 || SendTo.SelectedIndex == 2))
-					MessageBox.Show("Nextion device is not connected".Translate());
-				else if (tbManualCommand.Lines.Length > 0)
-					for (int i = tbManualCommand.Lines.Length - 1; i >= 0; i--)
-						if (tbManualCommand.Lines[i].Length > 2)
-						{
-							sendCode(tbManualCommand.Lines[i]);
-							break;
-						}
-			}
-		}
-		#endregion
-
-		#region sendCode
-		private void sendCode(string j)
-		{
-			if (SendTo.SelectedIndex == 0 || SendTo.SelectedIndex == 2)
-				sendSim(j);
-			if (SendTo.SelectedIndex == 1 || SendTo.SelectedIndex == 2)
-				m_com.SendStringEnd(j);
-		}
-		#endregion
-
-		#region sendSim
-		private void sendSim(string cmd)
-		{
-			if (ucRunScreen.InvokeRequired)
-				ucRunScreen.Invoke(new Action<string>(sendSim), cmd);
-			else
-			{
-				cmd = cmd.Trim();
-				if (cmd.Length > 2)
-				{
-					byte[] cmdBytes = cmd.ToBytes();
-					for (int i = 0; i < cmdBytes.Length; i++)
-						ucRunScreen.SendComData(cmdBytes[i]);
-
-					ucRunScreen.SendComData(0xff);
-					ucRunScreen.SendComData(0xff);
-					ucRunScreen.SendComData(0xff);
-				}
-			}
-		}
-		#endregion
-
-		#region addToSimResponse
-		/// <summary>
-		/// Add response to SIM Responses list
-		/// </summary>
-		/// <param name="response"></param>
-		private void addToSimResponse(string response)
-		{
-			if (lb_SimResponses.InvokeRequired)
-				lb_SimResponses.Invoke(new Action<string>(addToSimResponse), response);
-			else
-			{
-				lb_SimResponses.Items.Add(response);
-				lb_SimResponses.SelectedIndex = lb_SimResponses.Items.Count - 1;
-			}
-		}
-		#endregion
-
-		#region addMcuResponse
-		/// <summary>
-		/// Add response to MCU Responses list
-		/// </summary>
-		/// <param name="response"></param>
-		private void addMcuResponse(string response)
-		{
-			if (lb_SimResponses.InvokeRequired)
-				lb_SimResponses.Invoke(new Action<string>(addMcuResponse), response);
-			else
-			{
-				lb_McuResponses.Items.Add(response);
-				lb_McuResponses.SelectedIndex = lb_McuResponses.Items.Count - 1;
-			}
-		}
-		#endregion
-
-		#region addToLog
-		/// <summary>
-		/// Add response to Log
-		/// </summary>
-		/// <param name="response"></param>
-		private void addToLog(string response)
-		{
-			if (lb_Log.Visible)
-			{
-				if (lb_Log.InvokeRequired)
-				{
-					// lb_Log.Invoke(new Action<string>(addToSimResponse), response);
-				}
-				else if (lb_Log.Visible)
-				{
-					lb_Log.Items.Add(response);
-					lb_Log.SelectedIndex = lb_Log.Items.Count - 1;
-				}
-			}
-		}
-		#endregion
-
-		#region tbInterval_TextChanged
-		private void tbInterval_TextChanged(object sender, EventArgs e)
-		{
-			try
-			{
-				ms_interval = int.Parse(tbInterval.Text);
-				if (ms_interval > 1000)
-				{
-					tbInterval.Text = "1000";
-					ms_interval = 1000;
-				}
-			}
-			catch { }
-		}
-		#endregion
-
-		#region tbChannel_TextChanged
-		private void tbChannel_TextChanged(object sender, EventArgs e)
-		{
-			setChannel();
-		}
-		#endregion
-
-		#region timerMcuRead_Tick
-		private void timerMcuRead_Tick(object sender, EventArgs e)
-		{
-			string str;
-			int data;
-			timerMcuRead.Enabled = false;
-			if (m_com.IsOpen)
-			{
-				while (m_com.BytesToRead > 0)
-				{
-					m_ms_lastMcuReceive = 0;
-					data = m_com.ReadByte();
-					if (m_enableMcuReceive)
-						ucRunScreen.SendComData((byte)data);
-					if (data == 0xFF)
-						m_counter_0xFF++;
-					else
-						m_counter_0xFF = 0;
-
-					str = data.ToString("X2");
-					m_receivedMcuData = m_receivedMcuData + " 0x" + str;
-					
-					if (m_counter_0xFF > 2)
-					{	// More than 2 0xFF means end of package
-						addMcuResponse(m_receivedMcuData.Trim());
-						m_receivedMcuData = "";
-						m_counter_0xFF = 0;
-					}
-				}
-			}
-			timerMcuRead.Enabled = true;
-		}
-		#endregion
-
-		#region timerSimMcuLog_Tick 300 ms
-		private void timerSimMcuLog_Tick(object sender, EventArgs e)
-		{
-			TimerCom.Enabled = false;
-			if (m_ms_lastSimReceive > 300)
-			{
-				if (!string.IsNullOrEmpty(m_receivedSimData))
-				{
-					m_ddx = 0;
-					addToSimResponse(m_receivedSimData.Trim());
-					m_receivedSimData = "";
-					m_ms_lastSimReceive = 0;
-				}
-			}
-			else
-				m_ms_lastSimReceive += TimerCom.Interval;
-
-			if (m_ms_lastMcuReceive > 300)
-			{
-				if (!string.IsNullOrEmpty(m_receivedMcuData))
-				{
-					addMcuResponse(m_receivedMcuData.Trim());
-					m_receivedMcuData = "";
-					m_counter_0xFF = 0;
-					m_ms_lastMcuReceive = 0;
-				}
-			}
-			else
-				m_ms_lastMcuReceive += TimerCom.Interval;
-			
-			TimerCom.Enabled = true;
-		}
-		#endregion
-
-		#region miUpload_Click
-		private void miUpload_Click(object sender, EventArgs e)
-		{
-			bool flag = false;
-			stopSend();
-			if (m_com.IsOpen)
-			{
-				flag = true;
-				closeLink();
-			}
-			new FirmwareUpload(m_binPath).ShowDialog();
-			if (flag)
-			{
-				mi_Connect.Enabled = false;
-				mi_Upload.Enabled = false;
-				openMcuLink();
-				mi_Connect.Enabled = true;
-				mi_Upload.Enabled = true;
-			}
-		}
-		#endregion
-
-		#region miXY_Click
-		private void miXY_Click(object sender, EventArgs e)
-		{
-			m_showXY = !m_showXY;
-			panelDisplay.Refresh();
-		}
-		#endregion
-
-		#region miConnect_Click
-		private void miConnect_Click(object sender, EventArgs e)
-		{
-			mi_Connect.Enabled = false;
-			mi_Upload.Enabled = false;
-			try
-			{
-				if (mi_Connect.Text == "Disconnect".Translate())
-					closeLink();
-				else
-					openMcuLink();
-			}
-			catch (Exception ex)
-			{
-				MessageBox.Show(ex.Message);
-			}
-			mi_Connect.Enabled = true;
-			mi_Upload.Enabled = true;
 		}
 		#endregion
 	}

@@ -177,7 +177,7 @@ namespace NextionEditor
 
 		public void ChangeXY()
 		{
-			InfoRange bufPos = new InfoRange
+			Range bufPos = new Range
 			{
 				Begin = 0,
 				End = 7
@@ -274,7 +274,7 @@ namespace NextionEditor
 
 		public bool DeleteAttribute(string name)
 		{
-			InfoRange range = new InfoRange
+			Range range = new Range
 			{
 				Begin = 0,
 				End = 7
@@ -683,7 +683,7 @@ namespace NextionEditor
 
 		public byte[] GetAttributeValue(string name)
 		{
-			InfoRange range = new InfoRange
+			Range range = new Range
 			{
 				Begin = 0,
 				End = 7
@@ -1012,7 +1012,7 @@ namespace NextionEditor
 
 		public int GetNoteLength(string name, bool useMinus)
 		{
-			InfoRange range = new InfoRange
+			Range range = new Range
 			{
 				Begin = 0,
 				End = 7
@@ -1150,7 +1150,7 @@ namespace NextionEditor
 
 		public bool SetAttrTextLength(string name, string newval)
 		{
-			InfoRange bufPos = new InfoRange
+			Range bufPos = new Range
 			{
 				Begin = 0,
 				End = 7
@@ -1184,7 +1184,7 @@ namespace NextionEditor
 
 		public bool SetAttrValue(string name, string newval)
 		{
-			InfoRange range = new InfoRange
+			Range range = new Range
 			{
 				Begin = 0,
 				End = 7

@@ -96,7 +96,7 @@ namespace NextionEditor
             int index = 0;
             byte[] buf = new byte[500];
             InfoCodeResults cgcode = new InfoCodeResults();
-			cgcode.CodeResults = InfoRange.List(10);
+			cgcode.CodeResults = Range.List(10);
 
             try
             {
@@ -112,7 +112,7 @@ namespace NextionEditor
                 if (index < 1)
                     return 0;
 
-				InfoRange bufPos = new InfoRange(0, index);
+				Range bufPos = new Range(0, index);
 
 				num = Utility.IndexOf(buf, Utility.PatternBytes("comok "), bufPos, 1);
                 m_flashSize = 0;

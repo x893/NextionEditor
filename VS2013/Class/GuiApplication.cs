@@ -3,6 +3,15 @@ using System.Xml.Serialization;
 
 namespace NextionEditor
 {
+	public class UsartUpdata
+	{
+		public uint BaudRate;
+		public byte State;
+		public uint WriteLength;
+		public uint AllLength;
+		public ushort PageLength;
+	}
+
 	[XmlRoot("HmiApplication")]
 	public class GuiApplication
 	{
@@ -15,7 +24,7 @@ namespace NextionEditor
 		[XmlIgnore]
 		public InfoBrush BrushInfo;
 		[XmlIgnore]
-		public InfoUsartUpdata Usart;
+		public UsartUpdata Usart = new UsartUpdata();
 		[XmlIgnore]
 		public unsafe InfoPageObject* PageObjects;
 

@@ -3,34 +3,33 @@ using System.Runtime.InteropServices;
 
 namespace NextionEditor
 {
-	// [StructLayout(LayoutKind.Sequential)]
-	public class InfoRange
+	public class Range
 	{
 		public int Begin;
 		public int End;
 
-		public InfoRange(ushort begin, ushort end)
+		public Range(ushort begin, ushort end)
 		{
 			Begin = begin;
 			End = end;
 		}
-		public InfoRange()
+		public Range()
 		{
 		}
 
-		public InfoRange(int begin, int end)
+		public Range(int begin, int end)
 		{
 			Begin = begin;
 			End = end;
 		}
 
-		public static InfoRange[] List(int size)
+		public static Range[] List(int size)
 		{
-			List<InfoRange> list = new List<InfoRange>(size);
+			List<Range> list = new List<Range>(size);
 			while(size > 0)
 			{
 				--size;
-				list.Add(new InfoRange());
+				list.Add(new Range());
 			}
 			return list.ToArray();
 		}

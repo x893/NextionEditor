@@ -33,6 +33,7 @@ namespace NextionEditor
 		}
 		#endregion
 
+		#region ViewPic
 		public void ViewPic(Color bcolor, Brush fontbrush)
 		{
 			InfoPicture infoPic = App.Pictures[No];
@@ -61,10 +62,11 @@ namespace NextionEditor
 						);
 					graphics.DrawString(
 						No.ToString() + "--SIZE:" + infoPic.W.ToString() + "x" + infoPic.H.ToString(),
-						new Font(SystemFonts.DefaultFont.Name, 12f),
+						new Font(main.Form.Font.Name, main.Form.Font.Size),
 						fontbrush,
 						(PointF)new Point(10, base.Height - 20)
 						);
+					
 					base.Image = bg;
 					img.Dispose();
 				}
@@ -74,5 +76,6 @@ namespace NextionEditor
 				}
 			}
 		}
+		#endregion
 	}
 }

@@ -163,7 +163,7 @@ namespace NextionEditor
 
 
 		#region PosByteGetString
-		public static string PosByteGetString(InfoRange range, byte[] bytes)
+		public static string PosByteGetString(Range range, byte[] bytes)
 		{
 			return HmiOptions.Encoding.GetString(bytes, range.Begin, range.End - range.Begin + 1);
 		}
@@ -540,7 +540,7 @@ namespace NextionEditor
 		public static int GetComType(this byte[] bytes)
 		{
 			string[] strArray = new string[] { "cls ", "pic ", "picq ", "xstr ", "fill ", "line ", "draw ", "cir " };
-			InfoRange range = new InfoRange { Begin = 0 };
+			Range range = new Range { Begin = 0 };
 			foreach (string str in strArray)
 			{
 				range.End = (ushort)(bytes.Length - 1);
@@ -1152,15 +1152,15 @@ namespace NextionEditor
 		#endregion
 
 		#region RunCode
-		public static byte RunComOk(byte[] buf, InfoRange range, ushort valBegin, ushort valEnd, InfoCodeResults result, byte paramCount)
+		public static byte RunComOk(byte[] buf, Range range, ushort valBegin, ushort valEnd, InfoCodeResults result, byte paramCount)
 		{
 			byte[] val = PatternBytes("comok ");
-			InfoRange laction = new InfoRange();
+			Range laction = new Range();
 			ushort pos = 0;
 			ushort index = 0;
 			laction.End = range.End;
 			pos = IndexOf(buf, val, range, 0);
-			result.CodeResults = InfoRange.List(paramCount);
+			result.CodeResults = Range.List(paramCount);
 
 			if (pos == 0xffff)
 				return 0;
@@ -1195,7 +1195,7 @@ namespace NextionEditor
 		#endregion
 
 		#region PosGetU16
-		public static ushort PosGetU16(InfoRange Pos, byte[] bytes)
+		public static ushort PosGetU16(Range Pos, byte[] bytes)
 		{
 			ushort num = 0;
 			ushort num2 = 0;
@@ -1376,18 +1376,18 @@ namespace NextionEditor
 		/// <param name="pos"></param>
 		/// <param name="isAnyPosition">= 0 pattern must be at beginning, #0 at any position</param>
 		/// <returns></returns>
-		public static unsafe ushort IndexOf(byte[] buf, byte[] pattern, InfoRange pos, bool isAnyPosition)
+		public static unsafe ushort IndexOf(byte[] buf, byte[] pattern, Range pos, bool isAnyPosition)
 		{
 			fixed (byte* numRef = buf)
 				return IndexOf(numRef, pattern, pos, isAnyPosition);
 		}
 
-		public static unsafe ushort IndexOf(byte[] buf, string pattern, InfoRange pos)
+		public static unsafe ushort IndexOf(byte[] buf, string pattern, Range pos)
 		{
 			fixed (byte* numRef = buf)
 				return IndexOf(numRef, pattern, pos);
 		}
-		public static unsafe ushort IndexOf(byte* buf, string pattern, InfoRange pos)
+		public static unsafe ushort IndexOf(byte* buf, string pattern, Range pos)
 		{
 			byte[] pattBytes = Utility.PatternBytes(ref pattern);
 
@@ -1406,7 +1406,7 @@ namespace NextionEditor
 			return 0xFFFF;
 		}
 
-		public static unsafe ushort IndexOfAny(byte[] buf, string patt, InfoRange pos)
+		public static unsafe ushort IndexOfAny(byte[] buf, string patt, Range pos)
 		{
 			byte[] pattern = Utility.PatternBytes(ref patt);
 
@@ -1433,7 +1433,7 @@ namespace NextionEditor
 		/// <param name="pos"></param>
 		/// <param name="isAnyPosition">= 0 pattern must be at beginning, #0 at any position</param>
 		/// <returns></returns>
-		public static unsafe ushort IndexOf(byte* buf, byte[] pattern, InfoRange pos, bool isAnyPosition)
+		public static unsafe ushort IndexOf(byte* buf, byte[] pattern, Range pos, bool isAnyPosition)
 		{
 			int index = 0;
 			for (int i = pos.Begin; i <= pos.End; i++)
@@ -1454,7 +1454,7 @@ namespace NextionEditor
 			return 0xFFFF;
 		}
 
-		public static ushort IndexOf(byte[] src, byte[] pattern, InfoRange range, byte starmod)
+		public static ushort IndexOf(byte[] src, byte[] pattern, Range range, byte starmod)
 		{
 			ushort patternIdx = 0;
 			for (int srcIdx = range.Begin; srcIdx <= range.End; srcIdx++)

@@ -20,7 +20,7 @@ namespace NextionEditor
         private ToolStripMenuItem mi_Export;
         private Label label1;
         private Label label4;
-        private Panel panel1;
+        private Panel panelList;
         private Panel panel2;
         private Panel panel3;
         private PictureBox pictureBox1;
@@ -121,7 +121,7 @@ namespace NextionEditor
 				ImgPicture imgpicture = (ImgPicture)sender;
 				if (DImgPic != null)
 				{
-					DImgPic.ViewPic(panel1.BackColor, Brushes.Black);
+					DImgPic.ViewPic(panelList.BackColor, Brushes.Black);
 				}
 				DImgPic = imgpicture;
 				DImgPic.ViewPic(Color.Blue, Brushes.White);
@@ -206,10 +206,10 @@ namespace NextionEditor
 				label1.Top = num;
 				label1.Left = (base.Width - label1.Width) - 2;
 				num += label4.Height;
-				panel1.Top = num;
-				panel1.Left = 2;
-				panel1.Width = base.Width - 4;
-				panel1.Height = ((base.Height - num) - panel2.Height) - 2;
+				panelList.Top = num;
+				panelList.Left = 2;
+				panelList.Width = base.Width - 4;
+				panelList.Height = ((base.Height - num) - panel2.Height) - 2;
 				panel2.Top = (base.Height - panel2.Height) - 2;
 				panel2.Left = 2;
 				panel2.Width = base.Width - 4;
@@ -222,7 +222,7 @@ namespace NextionEditor
         public void RefreshPictures()
         {
             DImgPic = null;
-            panel1.Controls.Clear();
+            panelList.Controls.Clear();
 
             if (m_app != null)
             {
@@ -239,8 +239,8 @@ namespace NextionEditor
                                 imgPicture.Location = new Point(0, prevPicture.Location.Y + prevPicture.Height);
                             
 							imgPicture.No = i;
-                            imgPicture.Size = new Size((panel1.Width > 0x18) ? (panel1.Width - 0x18) : 0, 10);
-                            panel1.Controls.Add(imgPicture);
+                            imgPicture.Size = new Size((panelList.Width > 24) ? panelList.Width - 24 : 0, 10);
+                            panelList.Controls.Add(imgPicture);
 
                             imgPicture.Visible = true;
                             imgPicture.Focus();
@@ -266,7 +266,7 @@ namespace NextionEditor
             m_app = app;
             if (app == null)
             {
-                panel1.Controls.Clear();
+                panelList.Controls.Clear();
                 ButtonDeleteAll.Enabled = false;
                 ButtonInsert.Enabled = false;
                 ButtonReplace.Enabled = false;
@@ -300,7 +300,7 @@ namespace NextionEditor
 			this.label4 = new System.Windows.Forms.Label();
 			this.btn_Add = new System.Windows.Forms.Button();
 			this.btn_Delete = new System.Windows.Forms.Button();
-			this.panel1 = new System.Windows.Forms.Panel();
+			this.panelList = new System.Windows.Forms.Panel();
 			this.ButtonDeleteAll = new System.Windows.Forms.Button();
 			this.ButtonInsert = new System.Windows.Forms.Button();
 			this.ButtonReplace = new System.Windows.Forms.Button();
@@ -357,15 +357,15 @@ namespace NextionEditor
 			this.btn_Delete.UseVisualStyleBackColor = true;
 			this.btn_Delete.Click += new System.EventHandler(this.btn_Delete_Click);
 			// 
-			// panel1
+			// panelList
 			// 
-			this.panel1.AutoScroll = true;
-			this.panel1.BackColor = System.Drawing.Color.White;
-			this.panel1.Location = new System.Drawing.Point(20, 169);
-			this.panel1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-			this.panel1.Name = "panel1";
-			this.panel1.Size = new System.Drawing.Size(338, 289);
-			this.panel1.TabIndex = 44;
+			this.panelList.AutoScroll = true;
+			this.panelList.BackColor = System.Drawing.Color.White;
+			this.panelList.Location = new System.Drawing.Point(20, 169);
+			this.panelList.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+			this.panelList.Name = "panelList";
+			this.panelList.Size = new System.Drawing.Size(338, 289);
+			this.panelList.TabIndex = 44;
 			// 
 			// ButtonDeleteAll
 			// 
@@ -467,47 +467,47 @@ namespace NextionEditor
             this.mi_Export,
             this.mi_DeleteAll});
 			this.contextMenu.Name = "contextMenu";
-			this.contextMenu.Size = new System.Drawing.Size(135, 160);
+			this.contextMenu.Size = new System.Drawing.Size(116, 136);
 			// 
 			// mi_Add
 			// 
 			this.mi_Add.Name = "mi_Add";
-			this.mi_Add.Size = new System.Drawing.Size(134, 26);
+			this.mi_Add.Size = new System.Drawing.Size(115, 22);
 			this.mi_Add.Text = "Add";
 			this.mi_Add.Click += new System.EventHandler(this.mi_Add_Click);
 			// 
 			// mi_Delete
 			// 
 			this.mi_Delete.Name = "mi_Delete";
-			this.mi_Delete.Size = new System.Drawing.Size(134, 26);
+			this.mi_Delete.Size = new System.Drawing.Size(115, 22);
 			this.mi_Delete.Text = "Delete";
 			this.mi_Delete.Click += new System.EventHandler(this.btn_Delete_Click);
 			// 
 			// mi_Insert
 			// 
 			this.mi_Insert.Name = "mi_Insert";
-			this.mi_Insert.Size = new System.Drawing.Size(134, 26);
+			this.mi_Insert.Size = new System.Drawing.Size(115, 22);
 			this.mi_Insert.Text = "Insert";
 			this.mi_Insert.Click += new System.EventHandler(this.btn_Insert_Click);
 			// 
 			// mi_Replace
 			// 
 			this.mi_Replace.Name = "mi_Replace";
-			this.mi_Replace.Size = new System.Drawing.Size(134, 26);
+			this.mi_Replace.Size = new System.Drawing.Size(115, 22);
 			this.mi_Replace.Text = "Replace";
 			this.mi_Replace.Click += new System.EventHandler(this.btn_Replace_Click);
 			// 
 			// mi_Export
 			// 
 			this.mi_Export.Name = "mi_Export";
-			this.mi_Export.Size = new System.Drawing.Size(134, 26);
+			this.mi_Export.Size = new System.Drawing.Size(115, 22);
 			this.mi_Export.Text = "Export";
 			this.mi_Export.Click += new System.EventHandler(this.mi_Export_Click);
 			// 
 			// mi_DeleteAll
 			// 
 			this.mi_DeleteAll.Name = "mi_DeleteAll";
-			this.mi_DeleteAll.Size = new System.Drawing.Size(134, 26);
+			this.mi_DeleteAll.Size = new System.Drawing.Size(115, 22);
 			this.mi_DeleteAll.Text = "Del All";
 			this.mi_DeleteAll.Click += new System.EventHandler(this.btn_DeleteAll_Click);
 			// 
@@ -518,7 +518,7 @@ namespace NextionEditor
 			this.BackColor = System.Drawing.Color.Black;
 			this.Controls.Add(this.label1);
 			this.Controls.Add(this.label4);
-			this.Controls.Add(this.panel1);
+			this.Controls.Add(this.panelList);
 			this.Controls.Add(this.pictureBox1);
 			this.Controls.Add(this.panel2);
 			this.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));

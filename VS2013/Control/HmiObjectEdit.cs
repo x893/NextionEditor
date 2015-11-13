@@ -31,7 +31,7 @@ namespace NextionEditor
 		private MouseState m_mouseState = MouseState.Defaut;
 		private int m_mouseChoose = 3;
 		private Point m_objPoint;
-		private InfoRange m_objXY = new InfoRange();
+		private Range m_objXY = new Range();
 		private Pen m_pen = new Pen(Color.Red, 1f);
 
 		public HmiObjectEdit()
@@ -51,7 +51,7 @@ namespace NextionEditor
 		{
 			List<byte[]> listCmd = new List<byte[]>();
 			byte[] buffer = new byte[1];
-			InfoRange range = new InfoRange();
+			Range range = new Range();
 			try
 			{
 				Graphics.FromImage(HmiRunScreen.ThisBmp[1]).Clear(Color.FromArgb(0, 0, 0, 0));

@@ -128,11 +128,13 @@ namespace NextionEditor
 
 		#endregion
 
+		public static main Form;
 		#region Constructor
 		public main()
 		{
 			InitializeComponent();
 			Utility.Translate(this);
+			Form = this;
 		}
 		#endregion
 

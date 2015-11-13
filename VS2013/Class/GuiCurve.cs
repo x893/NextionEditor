@@ -121,7 +121,7 @@ namespace NextionEditor
 			}
 		}
 
-		public unsafe bool GuiCruveCmd(byte[] cmd, InfoRange cmdRange, InfoRange range)
+		public unsafe bool GuiCruveCmd(byte[] cmd, Range cmdRange, Range range)
 		{
 			range.End = range.Begin;
 			while (cmd[range.End] != ',')

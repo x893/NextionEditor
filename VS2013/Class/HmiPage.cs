@@ -26,13 +26,12 @@ namespace NextionEditor
 			bool flag = true;
 
 			List<byte[]> newlist = new List<byte[]>();
-			List<byte[]> list2 = new List<byte[]>();
+			List<byte[]> codes = new List<byte[]>();
 
 			byte[] binTFT = new byte[HmiOptions.InfoPageObjectSize * HmiObjects.Count + 4];
-			byte[] ll = new byte[0];
+			byte[] customData = new byte[0];
 
 			Codes.Clear();
-			InfoPageObject infoPage;
 			ushort customDataAddress = (ushort)(App.OverBytes.Length - 4);
 
 			try
@@ -42,31 +41,33 @@ namespace NextionEditor
 				customDataAddress += (ushort)(binTFT.Length - 4);
 				for (int idxObj = 0; idxObj < HmiObjects.Count; idxObj++)
 				{
-					if (!objDetect(textCompile, HmiObjects[idxObj]))
+					HmiObject hmiObj = HmiObjects[idxObj];
+					if (!objDetect(textCompile, hmiObj))
 					{
 						flag = false;
 						continue;
 					}
 
-					infoPage.TouchState = 1;
-					if (HmiObjects[idxObj].ObjInfo.Panel.loadlei == 1)
-						infoPage.Visible = 1;
+					InfoPageObject infoPageObj;
+					infoPageObj.TouchState = 1;
+					if (hmiObj.ObjInfo.Panel.loadlei == 1)
+						infoPageObj.Visible = 1;
 					else
-						infoPage.Visible = 0;
+						infoPageObj.Visible = 0;
 
-					infoPage.RefreshFlag = HmiObjects[idxObj].ObjInfo.Panel.loadlei;
-					Utility.ToBytes(infoPage).CopyTo(binTFT, idxObj * HmiOptions.InfoPageObjectSize + 4);
+					infoPageObj.RefreshFlag = hmiObj.ObjInfo.Panel.loadlei;
+					Utility.ToBytes(infoPageObj).CopyTo(binTFT, idxObj * HmiOptions.InfoPageObjectSize + 4);
 
-					if (HmiObjects[idxObj].ObjInfo.IsCustomData == 0)
+					if (hmiObj.ObjInfo.IsCustomData == 0)
 					{
-						HmiObjects[idxObj].ObjInfo.AttributeStart = customDataAddress;
-						ll = Utility.ToBytes((uint)customDataAddress);
-						ushort objRamBytes = HmiObjects[idxObj].GetObjRamBytes(ref ll, customDataAddress);
+						hmiObj.ObjInfo.AttributeStart = customDataAddress;
+						customData = Utility.ToBytes((uint)customDataAddress);
+						ushort objRamBytes = hmiObj.GetObjRamBytes(ref customData, customDataAddress);
 						if (objRamBytes != 0)
 						{
-							list2.Add(ll);
-							HmiObjects[idxObj].ObjInfo.AttributeLength = objRamBytes;
-							customDataAddress += HmiObjects[idxObj].ObjInfo.AttributeLength;
+							codes.Add(customData);
+							hmiObj.ObjInfo.AttributeLength = objRamBytes;
+							customDataAddress += hmiObj.ObjInfo.AttributeLength;
 						}
 					}
 				}
@@ -95,12 +96,12 @@ namespace NextionEditor
 						" OK! Occupy memory:".Translate(),
 						customDataAddress), Color.Black);
 
-				ll = Utility.MergeBytes(Utility.ToBytes((uint)0xffff), Utility.ToBytes((uint)customDataAddress));
-				list2.Add(ll);
+				customData = Utility.MergeBytes(Utility.ToBytes((uint)0xffff), Utility.ToBytes((uint)customDataAddress));
+				codes.Add(customData);
 
 				Codes.Add(Utility.PatternBytes("cre"));
 				Codes.Add(binTFT);
-				Utility.AppendList(Codes, list2);
+				Utility.AppendList(Codes, codes);
 				Codes.Add(Utility.PatternBytes("end"));
 
 				newlist.Clear();

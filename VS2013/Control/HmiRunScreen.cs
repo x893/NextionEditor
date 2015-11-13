@@ -12,27 +12,37 @@ namespace NextionEditor
 {
 	public class HmiRunScreen : UserControl
 	{
-		public class ComQueue
+		#region Classes
+		private class HmiTime
+		{
+			public uint SystemRuntime;
+			public uint Timer20ms;
+			public uint MoveTime;
+		}
+		private class HmiSysTimer
+		{
+			public byte ThSleepUp;
+			public uint ThSp;
+			public uint UsSp;
+		}
+		private class ComQueue
 		{
 			public byte State;
 			public byte CodePause;
-			public InfoRange[] Queue;
+			public Range[] Queue;
 			public ushort RecvPos;
 			public byte DiulieYunxing;
 			public byte Current;
 		}
 
-		[StructLayout(LayoutKind.Sequential)]
-		private struct InfoLcdDevice
+		private class LcdDevice
 		{
 			public ushort Width;
 			public ushort Height;
 			public byte Draw;
 			public ushort DrawColor;
 		}
-
-		[StructLayout(LayoutKind.Sequential)]
-		private struct InfoScreen
+		private class HmiScreen
 		{
 			public int Xpos;
 			public int Ypos;
@@ -41,11 +51,27 @@ namespace NextionEditor
 			public int DX;
 			public int DY;
 		}
+		private class HmiTimer
+		{
+			public byte State;
+			public ushort Value;
+			public ushort MaxValue;
+			public ushort CodeBegin;
+		}
+		private struct AttributeRun
+		{
+			public InfoAttribute AttrInfo;
+			public unsafe byte* Pz;
+			public uint Value;
+		}
+		#endregion
+
 		#region Public
 		public event EventHandler ObjChange;
 		public event EventHandler ObjMouseUp;
 		public event EventHandler SendByte;
-		public event EventHandler SendRunCode;
+		public delegate void SendRunCodeHandler(string cmd);
+		public event SendRunCodeHandler SendRunCode;
 
 		public GuiApplication GuiApp = new GuiApplication();
 		public GuiObjControl[] GuiObjControl = new GuiObjControl[2];
@@ -60,42 +86,42 @@ namespace NextionEditor
 		#endregion
 
 		#region Private
+		private const byte dataFrom_RAM = 0x00;
+		private const byte dataFrom_Buf = 0x01;
+		private const byte dataFrom_We = 0x14;
+		private const byte dataFrom_Sys_Baud = 0x68;
+		private const byte dataFrom_Sys_Bauds = 0x69;
+		private const byte dataFrom_Sys_Bkcmd = 0x67;
+		private const byte dataFrom_Sys_Bl = 0x65;
+		private const byte dataFrom_Sys_IntBl = 0x66;
+		private const byte dataFrom_Sys_SpaX = 0x6A;
+		private const byte dataFrom_Sys_SpaY = 0x6B;
+		private const byte dataFrom_Sys_Ussp = 0x6C;
+		private const byte dataFrom_Sys_ThSp = 0x6D;
+		private const byte dataFrom_Sys_ThUp = 0x6E;
+		private const byte dataFrom_Sys_X = 0xC8;
+		private const byte dataFrom_Null = 0xFF;
+
 		private ushort m_TPDownEnter = 0;
 		private ushort m_TPUpEnter = 0;
 		private HmiApplication m_app;
 		private HmiSysTimer m_sysTimer = new HmiSysTimer();
-		private InfoTime m_timeInf;
+		private HmiTime m_hmiTime = new HmiTime();
 		private bool m_isPortrait = false;
 		private byte m_runState = 1;
 		private string m_binPath;
 		private StreamReader m_reader = null;
-		private byte[] m_comBuffer = new byte[0x400];
+		private byte[] m_comBuffer = new byte[1024];
 		private int m_ComQueueLength = 100;
 		private byte m_comEnd = 0;
 		private ComQueue m_ComQueue = new ComQueue();
 		private InfoCodeResults m_cgCode = new InfoCodeResults();
 
-		private byte datafrom_ram = 0x00;
-		private byte datafrom_buf = 0x01;
-		private byte datafrom_zan = 0x14;
-		private byte datafrom_sys_baud = 0x68;
-		private byte datafrom_sys_bauds = 0x69;
-		private byte datafrom_sys_bkcmd = 0x67;
-		private byte datafrom_sys_bl = 0x65;
-		private byte datafrom_sys_intbl = 0x66;
-		private byte datafrom_sys_spax = 0x6A;
-		private byte datafrom_sys_spay = 0x6B;
-		private byte datafrom_sys_ussp = 0x6C;
-		private byte datafrom_sys_thsp = 0x6D;
-		private byte datafrom_sys_thup = 0x6E;
-		private byte datafrom_sys_x = 0xC8;
-		private byte datafrom_null = 0xFF;
-
 		private Graphics m_gc;
 		private GuiCurve m_guiCurve;
 		private GuiSlider m_guiSlider;
 
-		private byte[] m_hexStrBuf = new byte[0x400];
+		private byte[] m_hexStrBuf = new byte[1024];
 		private ushort[] m_hexStrPos = new ushort[4];
 
 		private IContainer components = null;
@@ -105,13 +131,18 @@ namespace NextionEditor
 		private Label label4;
 		private Label label5;
 		private Panel panelScreen;
-		private InfoLcdDevice m_lcdDevInfo = new InfoLcdDevice();
-		private InfoScreen m_screenInfo = new InfoScreen();
-		private InfoTimer[] m_timerInfo = new InfoTimer[5];
+		private LcdDevice m_lcdDevInfo = new LcdDevice();
+		private HmiScreen m_screen = new HmiScreen();
+		private HmiTimer[] m_timers = new HmiTimer[]
+			{	new HmiTimer(),
+				new HmiTimer(),
+				new HmiTimer(),
+				new HmiTimer(),
+				new HmiTimer()
+			};
 		private InfoFont m_fontInfo;
 
 		private Point m_mouse_pos;
-		private byte m_timerCount = 5;
 		private byte m_systemLength = 4;
 		private Thread m_main_thread;
 		private Thread m_timer_ms;
@@ -128,93 +159,86 @@ namespace NextionEditor
 		#endregion
 
 		#region AttributeAdd
-		public unsafe byte AttributeAdd(byte* buf, ref InfoRunAttribute b1, ref InfoRunAttribute b2, ref InfoRunAttribute b3, byte operation)
-		{
-			fixed (InfoRunAttribute* runattinfRef = &b1)
-			fixed (InfoRunAttribute* runattinfRef2 = &b2)
-			fixed (InfoRunAttribute* runattinfRef3 = &b3)
-				return AttributeAdd(buf, runattinfRef, runattinfRef2, runattinfRef3, operation);
-		}
-		public unsafe byte AttributeAdd(byte[] buf, ref InfoRunAttribute b1, ref InfoRunAttribute b2, ref InfoRunAttribute b3, byte operation)
+		private unsafe byte AttributeAdd(byte[] buf, ref AttributeRun b1, ref AttributeRun b2, ref AttributeRun b3, byte operation)
 		{
 			fixed (byte* pb = &buf[0])
-			fixed (InfoRunAttribute* pb1 = &b1)
-			fixed (InfoRunAttribute* pb2 = &b2)
-			fixed (InfoRunAttribute* pb3 = &b3)
-				return AttributeAdd(pb, pb1, pb2, pb3, operation);
+			fixed (AttributeRun* aref1 = &b1)
+			fixed (AttributeRun* aref2 = &b2)
+			fixed (AttributeRun* aref3 = &b3)
+				return AttributeAdd(pb, aref1, aref2, aref3, operation);
 		}
-		public unsafe byte AttributeAdd(byte* buf, InfoRunAttribute* b1, InfoRunAttribute* b2, InfoRunAttribute* b3, byte operation)
+		private unsafe byte AttributeAdd(byte* buf, AttributeRun* attr1, AttributeRun* attr2, AttributeRun* attr3, byte operation)
 		{
 			ushort num = 0;
-			if (b1->AttInfo.AttrType > 9
-				&& b2->AttInfo.AttrType > 9
-				&& b3->AttInfo.AttrType > 9
+			if (attr1->AttrInfo.AttrType > 9
+				&& attr2->AttrInfo.AttrType > 9
+				&& attr3->AttrInfo.AttrType > 9
 				&& operation == 0x2b
 				)
 			{
-				if ((b1->AttInfo.DataStart == datafrom_ram) && (b1->Pz == b3->Pz))
+				if ((attr1->AttrInfo.DataStart == dataFrom_RAM) && (attr1->Pz == attr3->Pz))
 				{
-					if (setAttr(b2, b3, operation) > 0)
+					if (setAttr(attr2, attr3, operation) > 0)
 						return 1;
 				}
-				else if ((b2->AttInfo.DataStart == datafrom_ram) && (b2->Pz == b3->Pz))
+				else if ((attr2->AttrInfo.DataStart == dataFrom_RAM) && (attr2->Pz == attr3->Pz))
 				{
-					if (setAttr(b1, b3, operation) > 0)
+					if (setAttr(attr1, attr3, operation) > 0)
 						return 1;
 				}
 				else
 				{
-					if (setAttr(b1, b3, 0) == 0)
+					if (setAttr(attr1, attr3, 0) == 0)
 					{
 						sendReturnErr(0x1b);
 						return 0;
 					}
-					if (setAttr(b2, b3, operation) > 0)
+					if (setAttr(attr2, attr3, operation) > 0)
 						return 1;
 				}
 			}
 			else
 			{
-				if (b2->AttInfo.AttrType < HmiAttributeType.String
-				 && b3->AttInfo.AttrType == HmiAttributeType.String
+				if (attr2->AttrInfo.AttrType < HmiAttributeType.String
+				 && attr3->AttrInfo.AttrType == HmiAttributeType.String
 					)
 				{
-					num = getStringLength(b3->Pz);
-					if (num <= b2->Value)
+					num = getStringLength(attr3->Pz);
+					if (num <= attr2->Value)
 					{
-						b3->Pz[0] = 0;
+						attr3->Pz[0] = 0;
 						return 1;
 					}
-					b3->Pz[num - b2->Value] = 0;
+					attr3->Pz[num - attr2->Value] = 0;
 					return 1;
 				}
-				if (b1->AttInfo.AttrType < HmiAttributeType.String
-				 && b2->AttInfo.AttrType < HmiAttributeType.String
-				 && b3->AttInfo.AttrType < HmiAttributeType.String
+				if (attr1->AttrInfo.AttrType < HmiAttributeType.String
+				 && attr2->AttrInfo.AttrType < HmiAttributeType.String
+				 && attr3->AttrInfo.AttrType < HmiAttributeType.String
 					)
 				{
 					if (operation == '+')
 					{
-						b3->Value = b1->Value + b2->Value;
-						setAttr(b3, b3, 0);
+						attr3->Value = attr1->Value + attr2->Value;
+						setAttr(attr3, attr3, 0);
 						return 1;
 					}
 					if (operation == '-')
 					{
-						b3->Value = b1->Value - b2->Value;
-						setAttr(b3, b3, 0);
+						attr3->Value = attr1->Value - attr2->Value;
+						setAttr(attr3, attr3, 0);
 						return 1;
 					}
 					if (operation == '*')
 					{
-						b3->Value = b1->Value * b2->Value;
-						setAttr(b3, b3, 0);
+						attr3->Value = attr1->Value * attr2->Value;
+						setAttr(attr3, attr3, 0);
 						return 1;
 					}
 					if (operation == '/')
 					{
-						b3->Value = (b2->Value == 0) ? 0 : (b1->Value / b2->Value);
-						setAttr(b3, b3, 0);
+						attr3->Value = (attr2->Value == 0) ? 0 : (attr1->Value / attr2->Value);
+						setAttr(attr3, attr3, 0);
 						return 1;
 					}
 				}
@@ -225,18 +249,18 @@ namespace NextionEditor
 		#endregion
 
 		#region attributeConvert
-		private unsafe byte attributeConvert(ref InfoRunAttribute b1, ref InfoRunAttribute b2, byte length)
+		private unsafe byte attributeConvert(ref AttributeRun b1, ref AttributeRun b2, byte length)
 		{
-			fixed (InfoRunAttribute* runattinfRef = &b1)
-			fixed (InfoRunAttribute* runattinfRef2 = &b2)
+			fixed (AttributeRun* runattinfRef = &b1)
+			fixed (AttributeRun* runattinfRef2 = &b2)
 				return attributeConvert(runattinfRef, runattinfRef2, length);
 		}
-		private unsafe byte attributeConvert(InfoRunAttribute* b1, InfoRunAttribute* b2, byte length)
+		private unsafe byte attributeConvert(AttributeRun* b1, AttributeRun* b2, byte length)
 		{
-			InfoRunAttribute runAttrInf = new InfoRunAttribute();
-			if (b1->AttInfo.AttrType < HmiAttributeType.String && b2->AttInfo.AttrType == HmiAttributeType.String)
+			AttributeRun runAttrInf = new AttributeRun();
+			if (b1->AttrInfo.AttrType < HmiAttributeType.String && b2->AttrInfo.AttrType == HmiAttributeType.String)
 			{
-				if (b2->AttInfo.DataStart != datafrom_ram)
+				if (b2->AttrInfo.DataStart != dataFrom_RAM)
 				{
 					sendReturnErr(0x1b);
 					return 0;
@@ -244,31 +268,31 @@ namespace NextionEditor
 				if (length == 0)
 					length = getIntStrLen(b1->Value);
 
-				if (b2->AttInfo.Length <= length)
-					length = (byte)(b2->AttInfo.Length - 1);
+				if (b2->AttrInfo.Length <= length)
+					length = (byte)(b2->AttrInfo.Length - 1);
 
 				intToStr(b1->Value, b2->Pz, length, 1);
 			}
-			else if (b1->AttInfo.AttrType == HmiAttributeType.String && b2->AttInfo.AttrType < HmiAttributeType.String)
+			else if (b1->AttrInfo.AttrType == HmiAttributeType.String && b2->AttrInfo.AttrType < HmiAttributeType.String)
 			{
 				b1->Value = StrToInt(b1->Pz, length);
-				if (b2->AttInfo.DataStart == datafrom_ram)
+				if (b2->AttrInfo.DataStart == dataFrom_RAM)
 				{
-					if (b1->Value <= b2->AttInfo.MaxValue && b1->Value >= b2->AttInfo.MinValue)
+					if (b1->Value <= b2->AttrInfo.MaxValue && b1->Value >= b2->AttrInfo.MinValue)
 					{
-						if (b2->AttInfo.Length > 4)
+						if (b2->AttrInfo.Length > 4)
 							memcpy(b2->Pz, (byte*)&b1->Value, 4);
 						else
-							memcpy(b2->Pz, (byte*)&b1->Value, b2->AttInfo.Length);
+							memcpy(b2->Pz, (byte*)&b1->Value, b2->AttrInfo.Length);
 					}
 				}
-				else if (b2->AttInfo.DataStart > 100 && b2->AttInfo.DataStart < 200)
+				else if (b2->AttrInfo.DataStart > 100 && b2->AttrInfo.DataStart < 200)
 				{
-					runAttrInf.AttInfo.DataStart = datafrom_zan;
+					runAttrInf.AttrInfo.DataStart = dataFrom_We;
 					runAttrInf.Value = b1->Value;
-					runAttrInf.AttInfo.AttrType = HmiAttributeType.Other;
-					runAttrInf.AttInfo.Length = 4;
-					runAttrInf.AttInfo.DataLength = 4;
+					runAttrInf.AttrInfo.AttrType = HmiAttributeType.Other;
+					runAttrInf.AttrInfo.Length = 4;
+					runAttrInf.AttrInfo.DataLength = 4;
 					return setAttr(&runAttrInf, b2, 0);
 				}
 			}
@@ -329,10 +353,10 @@ namespace NextionEditor
 		#region clearTimer()
 		private void clearTimer()
 		{
-			for (int i = 0; i < m_timerCount; i++)
+			for (int i = 0; i < m_timers.Length; i++)
 			{
-				m_timerInfo[i].State = 0;
-				m_timerInfo[i].MaxValue = 0xffff;
+				m_timers[i].State = 0;
+				m_timers[i].MaxValue = 0xffff;
 			}
 			GuiApp.TimerIndex = 0xff;
 		}
@@ -355,12 +379,12 @@ namespace NextionEditor
 			}
 		}
 		*/
-		public unsafe bool CodeExecute(byte[] buf, InfoRange range, int bitmapIndex)
+		public unsafe bool CodeExecute(byte[] buf, Range range, int bitmapIndex)
 		{
 			ushort num4;
 			uint num7;
-			InfoRange pos = new InfoRange(range.Begin, range.End);
-			InfoRunAttribute[] infoRunAttrs = new InfoRunAttribute[3];
+			Range pos = new Range(range.Begin, range.End);
+			AttributeRun[] infoRunAttrs = new AttributeRun[3];
 			byte[] buffer = new byte[50];
 			byte num = 0;
 			ushort index = 0;
@@ -466,13 +490,13 @@ namespace NextionEditor
 				pos.Begin = m_cgCode.CodeResults[10].Begin;
 				pos.End = m_cgCode.CodeResults[10].End;
 				num4 = getStringAttribute(buf, pos, ref infoRunAttrs[0]);
-				if (infoRunAttrs[0].AttInfo.DataStart == datafrom_null)
+				if (infoRunAttrs[0].AttrInfo.DataStart == dataFrom_Null)
 				{
 					sendReturnErr(0x1A);
 					return false;
 				}
 
-				if (infoRunAttrs[0].AttInfo.AttrType > 9)
+				if (infoRunAttrs[0].AttrInfo.AttrType > 9)
 					return XstringHZK(infoRunAttrs[0].Pz);
 
 				fixed (byte* numRef = buffer)
@@ -529,12 +553,12 @@ namespace NextionEditor
 				pos.Begin = m_cgCode.CodeResults[0].Begin;
 				pos.End = m_cgCode.CodeResults[0].End;
 				num4 = getStringAttribute(buf, pos, ref infoRunAttrs[0]);
-				if (infoRunAttrs[0].AttInfo.DataStart == datafrom_null)
+				if (infoRunAttrs[0].AttrInfo.DataStart == dataFrom_Null)
 				{
 					sendReturnErr(0x1a);
 					return false;
 				}
-				send_va(ref infoRunAttrs[0], 1);
+				send_va(ref infoRunAttrs[0], true);
 				return false;
 			}
 			#endregion
@@ -545,7 +569,7 @@ namespace NextionEditor
 				pos.Begin = m_cgCode.CodeResults[0].Begin;
 				pos.End = m_cgCode.CodeResults[0].End;
 				num3 = getStringAttribute(buf, pos, ref infoRunAttrs[0]);
-				if (infoRunAttrs[0].AttInfo.DataStart == datafrom_null)
+				if (infoRunAttrs[0].AttrInfo.DataStart == dataFrom_Null)
 				{
 					sendReturnErr(0x1a);
 					return false;
@@ -555,7 +579,7 @@ namespace NextionEditor
 					pos.Begin = m_cgCode.CodeResults[2].Begin;
 					pos.End = m_cgCode.CodeResults[2].End;
 					num3 = getStringAttribute(buf, pos, ref infoRunAttrs[1]);
-					if (infoRunAttrs[1].AttInfo.DataStart == datafrom_null)
+					if (infoRunAttrs[1].AttrInfo.DataStart == dataFrom_Null)
 					{
 						sendReturnErr(0x1a);
 						return false;
@@ -573,7 +597,7 @@ namespace NextionEditor
 				pos.Begin = m_cgCode.CodeResults[0].Begin;
 				pos.End = m_cgCode.CodeResults[0].End;
 				num3 = getStringAttribute(buf, pos, ref infoRunAttrs[0]);
-				if (infoRunAttrs[0].AttInfo.DataStart == datafrom_null)
+				if (infoRunAttrs[0].AttrInfo.DataStart == dataFrom_Null)
 				{
 					sendReturnErr(0x1a);
 					return false;
@@ -583,7 +607,7 @@ namespace NextionEditor
 					pos.Begin = m_cgCode.CodeResults[2].Begin;
 					pos.End = m_cgCode.CodeResults[2].End;
 					num3 = getStringAttribute(buf, pos, ref infoRunAttrs[1]);
-					if (infoRunAttrs[1].AttInfo.DataStart == datafrom_null)
+					if (infoRunAttrs[1].AttrInfo.DataStart == dataFrom_Null)
 					{
 						sendReturnErr(0x1a);
 						return false;
@@ -598,10 +622,9 @@ namespace NextionEditor
 			#region ussp
 			if (RunCode(buf, "ussp=", 1, range))
 			{
-				m_sysTimer.UsSp = GetU32(m_cgCode.CodeResults[0], buf) * 0x3e8;
+				m_sysTimer.UsSp = GetU32(m_cgCode.CodeResults[0], buf) * 1000;
 				if ((m_sysTimer.UsSp > 0) && (m_sysTimer.UsSp < 3000))
 					m_sysTimer.UsSp = 3000;
-				m_timeInf.sptime = m_timeInf.systemruntime;
 				return true;
 			}
 			#endregion
@@ -609,10 +632,9 @@ namespace NextionEditor
 			#region thsp
 			if (RunCode(buf, "thsp=", 1, range))
 			{
-				m_sysTimer.ThSp = GetU32(m_cgCode.CodeResults[0], buf) * 0x3e8;
-				if ((m_sysTimer.ThSp > 0) && (m_sysTimer.ThSp < 3000))
+				m_sysTimer.ThSp = GetU32(m_cgCode.CodeResults[0], buf) * 1000;
+				if (m_sysTimer.ThSp > 0 && m_sysTimer.ThSp < 3000)
 					m_sysTimer.ThSp = 3000;
-				m_timeInf.sptime = m_timeInf.systemruntime;
 				return true;
 			}
 			#endregion
@@ -700,6 +722,7 @@ namespace NextionEditor
 				return true;
 			}
 			#endregion
+
 			#region draw3d
 			if (RunCode(buf, "draw3d ", 6, range))
 			{
@@ -781,29 +804,29 @@ namespace NextionEditor
 				if (RunCode(buf, "topen ", 2, range) && GuiApp.HexStrIndex != 0xffff)
 				{
 					index = GetU16(m_cgCode.CodeResults[0], buf);
-					if (index >= m_timerCount)
+					if (index >= m_timers.Length)
 					{
 						sendReturnErr(6);
 						return false;
 					}
-					m_timerInfo[index].State = 0;
-					m_timerInfo[index].MaxValue = GetU16(m_cgCode.CodeResults[1], buf);
-					m_timerInfo[index].CodeBegin = GuiApp.HexStrIndex;
+					m_timers[index].State = 0;
+					m_timers[index].MaxValue = GetU16(m_cgCode.CodeResults[1], buf);
+					m_timers[index].CodeBegin = GuiApp.HexStrIndex;
 					for (; ; )
 					{
 						InfoString stringInfo = readInfoString(GuiApp.HexStrIndex);
 						++GuiApp.HexStrIndex;
 						if (stringInfo.Size > 0)
 						{
-							m_hexStrBuf = SPI_Flash_Read(GuiApp.App.StringDataStart + stringInfo.Start, stringInfo.Size);
+							SPI_Flash_Read(ref m_hexStrBuf, GuiApp.App.StringDataStart + stringInfo.Start, stringInfo.Size);
 							range.Begin = 0;
 							range.End = (ushort)(stringInfo.Size - 1);
 							if (Utility.IndexOf(m_hexStrBuf, "tend", range) != 0xffff)
 								break;
 						}
 					}
-					m_timerInfo[index].Value = 0;
-					m_timerInfo[index].State = 0;
+					m_timers[index].Value = 0;
+					m_timers[index].State = 0;
 					return true;
 				}
 				#endregion
@@ -812,18 +835,18 @@ namespace NextionEditor
 				if (RunCode(buf, "tpau ", 3, range))
 				{
 					index = GetU16(m_cgCode.CodeResults[0], buf);
-					if (index >= m_timerCount)
+					if (index >= m_timers.Length)
 					{
 						sendReturnErr(6);
 						return false;
 					}
-					if (m_timerInfo[index].MaxValue == 0xffff)
+					if (m_timers[index].MaxValue == 0xffff)
 					{
 						sendReturnErr(7);
 						return false;
 					}
-					m_timerInfo[index].MaxValue = GetU16(m_cgCode.CodeResults[1], buf);
-					m_timerInfo[index].State = (byte)GetU16(m_cgCode.CodeResults[2], buf);
+					m_timers[index].MaxValue = GetU16(m_cgCode.CodeResults[1], buf);
+					m_timers[index].State = (byte)GetU16(m_cgCode.CodeResults[2], buf);
 					return true;
 				}
 				#endregion
@@ -858,7 +881,7 @@ namespace NextionEditor
 				if (Utility.IndexOf(buf, "com_stop", range) != 0xffff)
 				{
 					m_ComQueue.CodePause = m_ComQueue.DiulieYunxing;
-					m_ComQueue.CodePause = (byte)(m_ComQueue.CodePause + 1);
+					m_ComQueue.CodePause++;
 					if (m_ComQueue.CodePause == m_ComQueueLength)
 						m_ComQueue.CodePause = 0;
 					return true;
@@ -914,12 +937,12 @@ namespace NextionEditor
 					pos.Begin = range.Begin + 6;
 					pos.End = range.End;
 					num4 = getStringAttribute(buf, pos, ref infoRunAttrs[0]);
-					if (infoRunAttrs[0].AttInfo.DataStart == datafrom_null)
+					if (infoRunAttrs[0].AttrInfo.DataStart == dataFrom_Null)
 					{
 						sendReturnErr(0x1a);
 						return false;
 					}
-					send_va(ref infoRunAttrs[0], 0);
+					send_va(ref infoRunAttrs[0], false);
 					return false;
 				}
 				#endregion
@@ -946,7 +969,7 @@ namespace NextionEditor
 						pos.Begin = (ushort)(range.Begin + 3);
 						pos.End = (ushort)(range.End - 1);
 						num4 = getStringAttribute(buf, pos, ref infoRunAttrs[0]);
-						if (infoRunAttrs[0].AttInfo.DataStart == datafrom_null)
+						if (infoRunAttrs[0].AttrInfo.DataStart == dataFrom_Null)
 						{
 							sendReturnErr(0x1A);
 							return false;
@@ -965,13 +988,13 @@ namespace NextionEditor
 								}
 								pos.Begin = num4;
 								num4 = getStringAttribute(buf, pos, ref infoRunAttrs[1]);
-								if (infoRunAttrs[1].AttInfo.DataStart == datafrom_null)
+								if (infoRunAttrs[1].AttrInfo.DataStart == dataFrom_Null)
 								{
 									sendReturnErr(0x1A);
 									return false;
 								}
 
-								if (MakeAttr(buf, ref infoRunAttrs[0], ref infoRunAttrs[1], length))
+								if (makeAttr(buf, ref infoRunAttrs[0], ref infoRunAttrs[1], length))
 								{
 									++GuiApp.HexStrIndex;
 									return false;
@@ -985,7 +1008,7 @@ namespace NextionEditor
 								{
 									InfoString stringInfo = readInfoString(GuiApp.HexStrIndex);
 									++GuiApp.HexStrIndex;
-									m_hexStrBuf = SPI_Flash_Read(GuiApp.App.StringDataStart + stringInfo.Start, stringInfo.Size);
+									SPI_Flash_Read(ref m_hexStrBuf, GuiApp.App.StringDataStart + stringInfo.Start, stringInfo.Size);
 									if (stringInfo.Size == 1)
 									{
 										if (m_hexStrBuf[0] == '}')
@@ -1026,22 +1049,22 @@ namespace NextionEditor
 
 					pos = m_cgCode.CodeResults[0];
 					num3 = getStringAttribute(buf, pos, ref infoRunAttrs[0]);
-					if ((infoRunAttrs[0].AttInfo.DataStart == datafrom_null) || (num3 != pos.End))
+					if ((infoRunAttrs[0].AttrInfo.DataStart == dataFrom_Null) || (num3 != pos.End))
 					{
 						sendReturnErr(0x1a);
 						return false;
 					}
 					pos = m_cgCode.CodeResults[1];
 					num3 = getStringAttribute(buf, pos, ref infoRunAttrs[1]);
-					if ((infoRunAttrs[1].AttInfo.DataStart == datafrom_null) || (num3 != pos.End))
+					if ((infoRunAttrs[1].AttrInfo.DataStart == dataFrom_Null) || (num3 != pos.End))
 					{
 						sendReturnErr(0x1a);
 						return false;
 					}
 
 					num = attributeConvert(ref infoRunAttrs[0], ref infoRunAttrs[1], (byte)GetU16(m_cgCode.CodeResults[2], buf));
-					if (num == 1 && infoRunAttrs[1].AttInfo.IsReturn < GuiApp.PageInfo.ObjCount)
-						GuiApp.PageObjects[infoRunAttrs[1].AttInfo.IsReturn].RefreshFlag = 1;
+					if (num == 1 && infoRunAttrs[1].AttrInfo.IsReturn < GuiApp.PageInfo.ObjCount)
+						GuiApp.PageObjects[infoRunAttrs[1].AttrInfo.IsReturn].RefreshFlag = 1;
 					return (num == 1);
 				}
 				#endregion
@@ -1099,14 +1122,14 @@ namespace NextionEditor
 
 							getAttribute(buffer, ref infoRunAttrs[2]);
 
-							if (infoRunAttrs[2].AttInfo.DataStart == datafrom_null)
+							if (infoRunAttrs[2].AttrInfo.DataStart == dataFrom_Null)
 							{
 								sendReturnErr(0x1a);
 								return false;
 							}
 
 							num3 = getStringAttribute(buf, pos, ref infoRunAttrs[0]);
-							if (infoRunAttrs[0].AttInfo.DataStart == datafrom_null)
+							if (infoRunAttrs[0].AttrInfo.DataStart == dataFrom_Null)
 							{
 								sendReturnErr(0x1a);
 								return false;
@@ -1124,7 +1147,7 @@ namespace NextionEditor
 									length = buf[num3];
 									pos.Begin = (ushort)(num3 + 1);
 									num3 = getStringAttribute(buf, pos, ref infoRunAttrs[1]);
-									if (infoRunAttrs[1].AttInfo.DataStart == datafrom_null)
+									if (infoRunAttrs[1].AttrInfo.DataStart == dataFrom_Null)
 									{
 										sendReturnErr(0x1A);
 										return false;
@@ -1140,7 +1163,7 @@ namespace NextionEditor
 											length = buf[num3];
 											pos.Begin = (ushort)(num3 + 1);
 											num3 = getStringAttribute(buf, pos, ref infoRunAttrs[1]);
-											if (infoRunAttrs[1].AttInfo.DataStart == datafrom_null)
+											if (infoRunAttrs[1].AttrInfo.DataStart == dataFrom_Null)
 											{
 												sendReturnErr(0x1A);
 												return false;
@@ -1161,8 +1184,8 @@ namespace NextionEditor
 									return false;
 								}
 							}
-							if (infoRunAttrs[2].AttInfo.IsReturn < GuiApp.PageInfo.ObjCount)
-								GuiApp.PageObjects[infoRunAttrs[2].AttInfo.IsReturn].RefreshFlag = 1;
+							if (infoRunAttrs[2].AttrInfo.IsReturn < GuiApp.PageInfo.ObjCount)
+								GuiApp.PageObjects[infoRunAttrs[2].AttrInfo.IsReturn].RefreshFlag = 1;
 							return true;
 						}
 					}
@@ -1269,7 +1292,7 @@ namespace NextionEditor
 		}
 		#endregion
 		#region
-		private unsafe ushort findSegmentation(byte[] buf, InfoRange bufPos)
+		private unsafe ushort findSegmentation(byte[] buf, Range bufPos)
 		{
 			int star = bufPos.Begin;
 			byte num2 = 0;
@@ -1311,7 +1334,7 @@ namespace NextionEditor
 			{
 				num3 = (num5 + num4) / 2;
 				add = num + (num3 * num7);
-				buffer = SPI_Flash_Read(add, 2);
+				SPI_Flash_Read(ref buffer, add, 2);
 				if (buffer[0] == h && buffer[1] == l)
 					return (add + 2);
 
@@ -1328,271 +1351,271 @@ namespace NextionEditor
 		#endregion
 
 		#region getAttribute
-		private unsafe void getAttribute(byte[] name, ref InfoRunAttribute attr)
+		private unsafe void getAttribute(byte[] name, ref AttributeRun attr)
 		{
 			uint index = 0;
 			uint num2 = 0;
 			byte num4 = 0;
 
 			InfoPage pageInfo = new InfoPage();
-			InfoString strInfo = new InfoString();
 
 			ushort stringInfoStart = (ushort)(GuiApp.PageInfo.InstStart + 4);
 			byte[] val = new byte[8];
 
-			InfoRange laction = new InfoRange(0, 14);
+			Range laction = new Range(0, 14);
 
-			attr.AttInfo.DataStart = datafrom_null;
-			attr.AttInfo.IsReturn = 0xff;
-			attr.Value = 0x499602d2;
+			attr.AttrInfo.DataStart = dataFrom_Null;
+			attr.AttrInfo.IsReturn = 0xff;
+			attr.Value = 1234567890;
 
-			if (compareString(name, "sysda", 5) == 1)
+			if (compareString(name, "sysda", 5))
 			{
 				if (name[5] != 0 && name[6] == 0)
 				{
-					num2 = (ushort)(name[5] - '0');
+					num2 = (uint)(name[5] - '0');
 					if (num2 < m_systemLength)
 					{
 						attr.Value = GuiApp.System[num2];
-						attr.AttInfo.DataStart = (byte)(190 + num2);	// 0xBE
-						attr.AttInfo.MaxValue = uint.MaxValue;
-						attr.AttInfo.MinValue = 0;
+						attr.AttrInfo.DataStart = (byte)(190 + num2);	// 0xBE
+						attr.AttrInfo.MaxValue = uint.MaxValue;
+						attr.AttrInfo.MinValue = 0;
 					}
 				}
 			}
-			else if (compareString(name, "bkcmd", 0) == 1)
+			else if (compareString(name, "bkcmd", 0))
 			{
 				attr.Value = GuiApp.SendReturn;
-				attr.AttInfo.DataStart = datafrom_sys_bkcmd;
-				attr.AttInfo.MaxValue = 3;
-				attr.AttInfo.MinValue = 0;
+				attr.AttrInfo.DataStart = dataFrom_Sys_Bkcmd;
+				attr.AttrInfo.MaxValue = 3;
+				attr.AttrInfo.MinValue = 0;
 			}
-			else if (compareString(name, "dim", 0) == 1)
+			else if (compareString(name, "dim", 0))
 			{
 				attr.Value = 50;
-				attr.AttInfo.DataStart = datafrom_sys_bl;
-				attr.AttInfo.MaxValue = 100;
-				attr.AttInfo.MinValue = 0;
+				attr.AttrInfo.DataStart = dataFrom_Sys_Bl;
+				attr.AttrInfo.MaxValue = 100;
+				attr.AttrInfo.MinValue = 0;
 			}
-			else if (compareString(name, "dims", 0) == 1)
+			else if (compareString(name, "dims", 0))
 			{
 				attr.Value = 50;
-				attr.AttInfo.DataStart = datafrom_sys_intbl;
-				attr.AttInfo.MaxValue = 100;
-				attr.AttInfo.MinValue = 0;
+				attr.AttrInfo.DataStart = dataFrom_Sys_IntBl;
+				attr.AttrInfo.MaxValue = 100;
+				attr.AttrInfo.MinValue = 0;
 			}
-			else if (compareString(name, "baud", 0) == 1)
+			else if (compareString(name, "baud", 0))
 			{
 				attr.Value = 0x2580;
-				attr.AttInfo.DataStart = datafrom_sys_baud;
-				attr.AttInfo.MaxValue = uint.MaxValue;
-				attr.AttInfo.MinValue = 0;
+				attr.AttrInfo.DataStart = dataFrom_Sys_Baud;
+				attr.AttrInfo.MaxValue = uint.MaxValue;
+				attr.AttrInfo.MinValue = 0;
 			}
-			else if (compareString(name, "bauds", 0) == 1)
+			else if (compareString(name, "bauds", 0))
 			{
 				attr.Value = 0x2580;
-				attr.AttInfo.DataStart = datafrom_sys_bauds;
-				attr.AttInfo.MaxValue = uint.MaxValue;
-				attr.AttInfo.MinValue = 0;
+				attr.AttrInfo.DataStart = dataFrom_Sys_Bauds;
+				attr.AttrInfo.MaxValue = uint.MaxValue;
+				attr.AttrInfo.MinValue = 0;
 			}
-			else if (compareString(name, "spax", 0) == 1)
+			else if (compareString(name, "spax", 0))
 			{
 				attr.Value = GuiApp.BrushInfo.SpacingX;
-				attr.AttInfo.DataStart = datafrom_sys_spax;
-				attr.AttInfo.MaxValue = 0xff;
-				attr.AttInfo.MinValue = 0;
+				attr.AttrInfo.DataStart = dataFrom_Sys_SpaX;
+				attr.AttrInfo.MaxValue = 0xff;
+				attr.AttrInfo.MinValue = 0;
 			}
-			else if (compareString(name, "spay", 0) == 1)
+			else if (compareString(name, "spay", 0))
 			{
 				attr.Value = GuiApp.BrushInfo.SpacingY;
-				attr.AttInfo.DataStart = datafrom_sys_spay;
-				attr.AttInfo.MaxValue = 0xff;
-				attr.AttInfo.MinValue = 0;
+				attr.AttrInfo.DataStart = dataFrom_Sys_SpaY;
+				attr.AttrInfo.MaxValue = 0xff;
+				attr.AttrInfo.MinValue = 0;
 			}
-			else if (compareString(name, "ussp", 0) == 1)
+			else if (compareString(name, "ussp", 0))
 			{
 				attr.Value = m_sysTimer.UsSp;
-				attr.AttInfo.DataStart = datafrom_sys_ussp;
-				attr.AttInfo.MaxValue = 0x3e7fc18;
-				attr.AttInfo.MinValue = 0;
+				attr.AttrInfo.DataStart = dataFrom_Sys_Ussp;
+				attr.AttrInfo.MaxValue = 65535000u;
+				attr.AttrInfo.MinValue = 0;
 			}
-			else if (compareString(name, "thsp", 0) == 1)
+			else if (compareString(name, "thsp", 0))
 			{
 				attr.Value = m_sysTimer.ThSp;
-				attr.AttInfo.DataStart = datafrom_sys_thsp;
-				attr.AttInfo.MaxValue = 0x3e7fc18;
-				attr.AttInfo.MinValue = 0;
+				attr.AttrInfo.DataStart = dataFrom_Sys_ThSp;
+				attr.AttrInfo.MaxValue = 65535000u;
+				attr.AttrInfo.MinValue = 0;
 			}
-			else if (compareString(name, "thup", 0) == 1)
+			else if (compareString(name, "thup", 0))
 			{
 				attr.Value = m_sysTimer.ThSleepUp;
-				attr.AttInfo.DataStart = datafrom_sys_thup;
-				attr.AttInfo.MaxValue = 1;
-				attr.AttInfo.MinValue = 0;
+				attr.AttrInfo.DataStart = dataFrom_Sys_ThUp;
+				attr.AttrInfo.MaxValue = 1;
+				attr.AttrInfo.MinValue = 0;
 			}
-			else if (compareString(name, "RED", 0) == 1)
-				attr.Value = 0xf800;
-			else if (compareString(name, "BLUE", 0) == 1)
-				attr.Value = 0x1f;
-			else if (compareString(name, "GRAY", 0) == 1)
+			else if (compareString(name, "RED", 0))
+				attr.Value = 0xF800;
+			else if (compareString(name, "BLUE", 0))
+				attr.Value = 0x001F;
+			else if (compareString(name, "GRAY", 0))
 				attr.Value = 0x8430;
-			else if (compareString(name, "BLACK", 0) == 1)
-				attr.Value = 0;
-			else if (compareString(name, "WHITE", 0) == 1)
-				attr.Value = 0xffff;
-			else if (compareString(name, "GREEN", 0) == 1)
-				attr.Value = 0x7e0;
-			else if (compareString(name, "BROWN", 0) == 1)
-				attr.Value = 0xbc40;
-			else if (compareString(name, "YELLOW", 0) == 1)
-				attr.Value = 0xffe0;
+			else if (compareString(name, "BLACK", 0))
+				attr.Value = 0x0000;
+			else if (compareString(name, "WHITE", 0))
+				attr.Value = 0xFFFF;
+			else if (compareString(name, "GREEN", 0))
+				attr.Value = 0x07E0;
+			else if (compareString(name, "BROWN", 0))
+				attr.Value = 0xBC40;
+			else if (compareString(name, "YELLOW", 0))
+				attr.Value = 0xFFE0;
 
-			if (attr.Value != 0x499602d2)
+			if (attr.Value != 1234567890)
 			{
-				if (attr.AttInfo.DataStart == datafrom_null)
-					attr.AttInfo.DataStart = datafrom_sys_x;
+				if (attr.AttrInfo.DataStart == dataFrom_Null)
+					attr.AttrInfo.DataStart = dataFrom_Sys_X;
 
-				attr.AttInfo.AttrType = HmiAttributeType.Other;
-				attr.AttInfo.Length = 4;
-				attr.AttInfo.DataLength = 4;
+				attr.AttrInfo.AttrType = HmiAttributeType.Other;
+				attr.AttrInfo.Length = 4;
+				attr.AttrInfo.DataLength = 4;
 			}
 			else
 			{
-				while (name[num2] != 0)
+				for (; name[num2] != 0; ++num2)
 				{
 					if (name[num2] == '.')
 						num4++;
-					num2++;
 				}
 
 				laction.Begin = 0;
 				laction.End = laction.Begin;
-				if (name[laction.Begin] != 0 && name[laction.Begin] != '.')
+
+				if (name[laction.Begin] == 0 || name[laction.Begin] == '.')
+					return;
+
+				ushort objIndex;
+				while (name[laction.End] != '.')
 				{
-					ushort objIndex;
+					++laction.End;
+					if (laction.End == '(' || name[laction.End] == 0)
+						return;
+				}
+				--laction.End;
+
+				if (num4 == 2)
+				{
+					objIndex = getPageName(laction, name, 0, ref GuiApp.PageInfo);
+					if (objIndex == 0xffff)
+						return;
+
+					if (objIndex == GuiApp.Page)
+					{
+						num4 = 1;
+						pageInfo = GuiApp.PageInfo;
+					}
+					else
+						pageInfo = readInfoPage(objIndex);
+
+					laction.Begin = laction.End + 2;
+					laction.End = laction.Begin;
+					if (name[laction.Begin] == 0 || name[laction.Begin] == '.')
+						return;
+
 					while (name[laction.End] != '.')
 					{
-						laction.End++;
+						++laction.End;
 						if (laction.End == '(' || name[laction.End] == 0)
 							return;
 					}
-					laction.End--;
-
-					if (num4 == 2)
-					{
-						objIndex = getPageName(
-							laction,
-							name,
-							0,
-							ref GuiApp.PageInfo
-							);
-						if (objIndex == 0xffff)
-							return;
-
-						if (objIndex == GuiApp.Page)
-						{
-							num4 = 1;
-							pageInfo = GuiApp.PageInfo;
-						}
-						else
-							pageInfo = readInfoPage(objIndex);
-
-						laction.Begin = (ushort)(laction.End + 2);
-						laction.End = laction.Begin;
-						if ((name[laction.Begin] == 0) || (name[laction.Begin] == '.'))
-							return;
-
-						while (name[laction.End] != '.')
-						{
-							laction.End++;
-							if ((laction.End == 40) || (name[laction.End] == 0))
-								return;
-						}
-						laction.End--;
-					}
-					else if (num4 == 1)
-						pageInfo = GuiApp.PageInfo;
-					else
+					--laction.End;
+				}
+				else
+				{
+					if (num4 != 1)
 						return;
+					pageInfo = GuiApp.PageInfo;
+				}
 
-					objIndex = getPageName(laction, name, 1, ref pageInfo);
-					if (objIndex != 0xffff)
+				objIndex = getPageName(laction, name, 1, ref pageInfo);
+				if (objIndex == 0xffff)
+					return;
+
+				objIndex = (ushort)(objIndex + pageInfo.ObjStart);
+				laction.Begin = laction.End + 2;
+				laction.End = laction.Begin;
+				if (laction.End >= 40 && name[laction.End] == 0)
+					return;
+
+				while (name[laction.End] != 0)
+				{
+					++laction.End;
+					if (laction.End == 40)
 					{
-						objIndex = (ushort)(objIndex + pageInfo.ObjStart);
-						laction.Begin = (ushort)(laction.End + 2);
-						laction.End = laction.Begin;
-						if ((laction.End < 40) && (name[laction.End] != 0))
+						++laction.End;
+						break;
+					}
+				}
+				--laction.End;
+
+				InfoObject infoObject = ReadObject(objIndex);
+
+				if (num4 == 2
+				 && infoObject.IsCustomData != 1
+				 || infoObject.StringInfoEnd - infoObject.StringInfoStart < 3
+					)
+					return;
+
+				Range pos2 = new Range(0, 2);
+				for (
+					stringInfoStart = infoObject.StringInfoStart;
+					stringInfoStart <= infoObject.StringInfoEnd;
+					++stringInfoStart
+					)
+				{
+					InfoString strInfo = readInfoString(stringInfoStart);
+					if (strInfo.Size >= (HmiOptions.InfoAttributeSize + 8))
+					{
+						SPI_Flash_Read(ref val, GuiApp.App.StringDataStart + strInfo.Start, 8);
+						index = Utility.IndexOf(name, val, laction, false);
+						if (index == laction.End)
 						{
-							while (name[laction.End] != 0)
+							attr.AttrInfo = Utility.ToStruct<InfoAttribute>(
+								SPI_Flash_Read(
+									GuiApp.App.StringDataStart + strInfo.Start + 8,
+									HmiOptions.InfoAttributeSize
+									)
+								);
+							attr.Value = 0;
+							if (num4 == 2)
+								attr.AttrInfo.IsReturn = 0xff;
+
+							if (attr.AttrInfo.CanModify == 1)
 							{
-								laction.End++;
-								if (laction.End == 40)
-								{
-									laction.End++;
-									break;
-								}
+								attr.AttrInfo.DataStart = dataFrom_RAM;
+								fixed (byte* px = &GuiApp.CustomData[attr.AttrInfo.Start])
+									attr.Pz = px;
 							}
-							laction.End--;
+							else
+								attr.AttrInfo.DataStart = dataFrom_Buf;
 
-							InfoObject infoObject = ReadObject(objIndex);
-							if ((num4 != 2 || infoObject.IsCustomData == 1)
-							 && (infoObject.StringInfoEnd - infoObject.StringInfoStart >= 3)
-								)
-							{
-								stringInfoStart = infoObject.StringInfoStart;
-								InfoRange pos2 = new InfoRange(0, 2);
-								while (stringInfoStart <= infoObject.StringInfoEnd)
-								{
-									strInfo = readInfoString(stringInfoStart);
-									if (strInfo.Size >= (HmiOptions.InfoAttributeSize + 8))
-									{
-										val = SPI_Flash_Read(GuiApp.App.StringDataStart + strInfo.Start, 8);
-										index = Utility.IndexOf(name, val, laction, false);
-										if (index != laction.End)
-										{
-											stringInfoStart++;
-											continue;
-										}
+							if (attr.AttrInfo.AttrType >= HmiAttributeType.String || attr.AttrInfo.Length >= 5)
+								break;
 
-										attr.AttInfo = Utility.ToStruct<InfoAttribute>(
-											SPI_Flash_Read(
-												GuiApp.App.StringDataStart + strInfo.Start + 8,
-												HmiOptions.InfoAttributeSize
-												)
-											);
-										attr.Value = 0;
-										if (num4 == 2)
-											attr.AttInfo.IsReturn = 0xff;
-										if (attr.AttInfo.CanModify == 1)
-										{
-											attr.AttInfo.DataStart = datafrom_ram;
-											fixed (byte* px = &GuiApp.CustomData[attr.AttInfo.Start])
-												attr.Pz = px;
-										}
-										else
-											attr.AttInfo.DataStart = datafrom_buf;
-
-										if ((attr.AttInfo.AttrType < HmiAttributeType.String) && (attr.AttInfo.Length < 5))
-										{
-											if (attr.AttInfo.CanModify == 1)
-												attr.Value = Utility.ToUInt32(GuiApp.CustomData, attr.AttInfo.Start, attr.AttInfo.Length);
-											else
-												attr.Value = Utility.ToUInt32(
-													SPI_Flash_Read(
-														GuiApp.App.StringDataStart + strInfo.Start + 8 + (uint)HmiOptions.InfoAttributeSize,
-														attr.AttInfo.Length
-													), 0, attr.AttInfo.Length);
-										}
-										break;
-									}
-									val = SPI_Flash_Read(GuiApp.App.StringDataStart + strInfo.Start, 3);
-									if (Utility.IndexOf(val, "end", pos2) != 0xffff)
-										break;
-
-									stringInfoStart++;
-								}
-							}
+							if (attr.AttrInfo.CanModify == 1)
+								attr.Value = Utility.ToUInt32(GuiApp.CustomData, attr.AttrInfo.Start, attr.AttrInfo.Length);
+							else
+								attr.Value = Utility.ToUInt32(
+									SPI_Flash_Read(
+										GuiApp.App.StringDataStart + strInfo.Start + 8 + (uint)HmiOptions.InfoAttributeSize,
+										attr.AttrInfo.Length
+									), 0, attr.AttrInfo.Length);
+							break;
 						}
+					}
+					else
+					{
+						SPI_Flash_Read(ref val, GuiApp.App.StringDataStart + strInfo.Start, 3);
+						if (Utility.IndexOf(val, "end", pos2) != 0xffff)
+							break;
 					}
 				}
 			}
@@ -1710,7 +1733,7 @@ namespace NextionEditor
 			{
 				return 5;
 			}
-			if (num >= 0x3e8)
+			if (num >= 1000)
 			{
 				return 4;
 			}
@@ -1727,16 +1750,16 @@ namespace NextionEditor
 		#endregion
 
 		#region getPageName
-		private unsafe ushort getPageName(InfoRange range, byte[] bt1, byte state, ref InfoPage page)
+		private ushort getPageName(Range range, byte[] bt1, byte state, ref InfoPage page)
 		{
 			byte[] buffer = new byte[14];
 			uint add = 0;
 			ushort pageCount = 0;
 			uint infoPageSize = 0;
-			int qyt = (int)(range.End - range.Begin + 2);
+			int nameLen = (int)(range.End - range.Begin + 2);
 
-			if (qyt > 14)
-				qyt = 14;
+			if (nameLen > 14)
+				nameLen = 14;
 
 			if (state == 0)
 			{
@@ -1756,7 +1779,7 @@ namespace NextionEditor
 
 			for (ushort i = 0; i < pageCount; i++)
 			{
-				buffer = SPI_Flash_Read(add, qyt);
+				SPI_Flash_Read(ref buffer, add, nameLen);
 				if (Utility.IndexOf(bt1, buffer, range, false) == range.End)
 					return i;
 
@@ -1766,98 +1789,14 @@ namespace NextionEditor
 		}
 		#endregion
 
-		#region 
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="state">1 for touch down, 0 for up</param>
-		/// <returns></returns>
-		private unsafe byte sendTouchState(byte state)
-		{
-			ushort num;
-			InfoObject infoObject;
-			infoObject.Panel.SendKey = 0;
-
-			byte index = (byte)(GuiApp.PageInfo.ObjEnd - GuiApp.PageInfo.ObjStart);
-			if (GuiApp.Touch.SendXY == 1)
-			{
-				sendByte(0x67);
-				sendByte((byte)(TPDevInf.X0 >> 8));
-				sendByte((byte)(TPDevInf.X0 >> 0));
-				sendByte((byte)(TPDevInf.Y0 >> 8));
-				sendByte((byte)(TPDevInf.Y0 >> 0));
-				sendByte(state);
-				sendEnd();
-			}
-
-			if (state == 1)
-			{	// Touch Down
-				for (num = GuiApp.PageInfo.ObjEnd; num >= GuiApp.PageInfo.ObjStart; --num)
-				{
-					if (GuiApp.PageObjects[index].Visible == 1)
-					{
-						infoObject = ReadObject(num);
-						if (TPDevInf.X0 > infoObject.Panel.X
-						 && TPDevInf.X0 < infoObject.Panel.EndX
-						 && TPDevInf.Y0 > infoObject.Panel.Y
-						 && TPDevInf.Y0 < infoObject.Panel.EndY
-							)
-						{
-							if (GuiApp.PageObjects[index].TouchState == 1)
-							{
-								GuiApp.DownObjId = index;
-								if (infoObject.ObjType == HmiObjType.OBJECT_TYPE_SLIDER)
-									m_guiSlider.GuiSliderPressDown(ref infoObject, index);
-
-								if (infoObject.Panel.Down != 0xffff)
-									GuiApp.HexStrIndex = (ushort)(infoObject.Panel.Down + infoObject.StringInfoStart);
-							}
-							break;
-						}
-					}
-					--index;
-					if (index > 0x7f)
-						return 0xff;
-				}
-			}
-			else if (state == 0)
-			{	// Touch Up
-				if (GuiApp.DownObjId == 0xff || GuiApp.PageObjects[GuiApp.DownObjId].Visible == 0)
-					return 0xff;
-
-				index = GuiApp.DownObjId;
-				num = (ushort)(GuiApp.DownObjId + GuiApp.PageInfo.ObjStart);
-				infoObject = ReadObject(num);
-				if (infoObject.ObjType == HmiObjType.OBJECT_TYPE_SLIDER)
-					m_guiSlider.GuiSliderPressUp(ref infoObject, GuiApp.DownObjId);
-
-				if (infoObject.Panel.Up != 0xff)
-					GuiApp.HexStrIndex = (ushort)(infoObject.Panel.Up + infoObject.StringInfoStart);
-
-				if (infoObject.Panel.Slide != 0xff)
-					setHexIndex((ushort)(infoObject.Panel.Slide + infoObject.StringInfoStart));
-			}
-
-			if ((infoObject.Panel.SendKey & (byte)(1 << state)) != 0)
-			{
-				sendByte(0x65);
-				sendByte((byte)GuiApp.Page);
-				sendByte(index);
-				sendByte(state);
-				sendEnd();
-			}
-			return index;
-		}
-		#endregion
-
 		#region getStrAtt(byte* buf, InfoRange thisPos, ref InfoRunAttribute att)
-		private unsafe ushort getStringAttribute(byte[] bytes, InfoRange range, ref InfoRunAttribute attr)
+		private unsafe ushort getStringAttribute(byte[] bytes, Range range, ref AttributeRun attr)
 		{
 			byte[] numArray = new byte[30];
 			int begin = range.Begin;
 			int end = 0;
 			ushort index = 0;
-			attr.AttInfo.DataStart = datafrom_null;
+			attr.AttrInfo.DataStart = dataFrom_Null;
 			if (range.End < range.Begin)
 				return 0xFFFF;
 
@@ -1902,7 +1841,7 @@ namespace NextionEditor
 							numArray[index] = 0;
 							getAttribute(numArray, ref attr);
 
-							if (attr.AttInfo.DataStart == datafrom_null)
+							if (attr.AttrInfo.DataStart == dataFrom_Null)
 								return 0xffff;
 
 							if (begin > range.End)
@@ -1972,22 +1911,22 @@ namespace NextionEditor
 				}
 				if (index != 0xffff)
 				{
-					attr.AttInfo.Start = (ushort)(range.Begin + 1);
-					attr.AttInfo.AttrType = HmiAttributeType.String;
-					attr.AttInfo.DataLength =
-					attr.AttInfo.Length = (ushort)(end - range.Begin);
-					attr.AttInfo.DataStart = datafrom_buf;
-					fixed (byte* pb = &bytes[attr.AttInfo.Start])
+					attr.AttrInfo.Start = (ushort)(range.Begin + 1);
+					attr.AttrInfo.AttrType = HmiAttributeType.String;
+					attr.AttrInfo.DataLength =
+					attr.AttrInfo.Length = (ushort)(end - range.Begin);
+					attr.AttrInfo.DataStart = dataFrom_Buf;
+					fixed (byte* pb = &bytes[attr.AttrInfo.Start])
 						attr.Pz = pb;
 				}
 				return index;
 			}
 
-			attr.AttInfo.DataLength = 4;
-			attr.AttInfo.Length = 4;
+			attr.AttrInfo.DataLength = 4;
+			attr.AttrInfo.Length = 4;
 			attr.Value = StrToInt(bytes, range.Begin, (byte)(begin - range.Begin + 1));
-			attr.AttInfo.AttrType = HmiAttributeType.Other;
-			attr.AttInfo.DataStart = datafrom_zan;
+			attr.AttrInfo.AttrType = HmiAttributeType.Other;
+			attr.AttrInfo.DataStart = dataFrom_We;
 			return (ushort)begin;
 		}
 		#endregion
@@ -2018,8 +1957,8 @@ namespace NextionEditor
 			IsEditor = isEditor;
 			m_binPath = binPath;
 
-			m_ComQueue.Queue = InfoRange.List(m_ComQueueLength);
-			m_cgCode.CodeResults = InfoRange.List(11);
+			m_ComQueue.Queue = Range.List(m_ComQueueLength);
+			m_cgCode.CodeResults = Range.List(11);
 			GuiApp.System = new uint[4];
 			GuiApp.CustomData = new byte[HmiOptions.MaxCustomDataSize];
 
@@ -2050,9 +1989,9 @@ namespace NextionEditor
 			InfoString stringInfo = readInfoString(0);
 			if (stringInfo.Size > 4)
 			{
-				GuiApp.CustomData = SPI_Flash_Read(
+				SPI_Flash_Read(ref GuiApp.CustomData,
 						GuiApp.App.StringDataStart + stringInfo.Start + 4,
-						(ushort)(stringInfo.Size - 4)
+						stringInfo.Size - 4
 					);
 				GuiApp.OveMerrys = (ushort)(stringInfo.Size - 4);
 			}
@@ -2070,6 +2009,7 @@ namespace NextionEditor
 				new GuiObjControl.RefreshHandler(m_guiSlider.GuiSliderRef),
 				new GuiObjControl.LoadHandler(m_guiSlider.GuiSliderLoad)
 			);
+
 			m_runState = 1;
 			if (!IsEditor && (m_main_thread == null || m_main_thread.IsAlive))
 			{
@@ -2079,7 +2019,7 @@ namespace NextionEditor
 				{
 					GuiApp.SendReturn = 2;
 					m_main_thread = new Thread(new ThreadStart(runMain));
-					m_timer_ms = new Thread(new ThreadStart(timerm_5ms));
+					m_timer_ms = new Thread(new ThreadStart(timer_5ms));
 					m_main_thread.Start();
 					m_timer_ms.Start();
 				}
@@ -2143,27 +2083,27 @@ namespace NextionEditor
 		{
 			if (m_isPortrait)
 			{
-				int num = (XEnd - Xpos) + 1;
-				int num2 = (m_lcdDevInfo.Width - Xpos) - num;
-				int num3 = (m_lcdDevInfo.Width - Xpos) - 1;
+				int num = XEnd - Xpos + 1;
+				int num2 = m_lcdDevInfo.Width - Xpos - num;
+				int num3 = m_lcdDevInfo.Width - Xpos - 1;
 				if (num2 < 0)
 					num2 = 0;
 
-				m_screenInfo.Xpos = num2;
-				m_screenInfo.Ypos = Ypos;
-				m_screenInfo.EndX = num3;
-				m_screenInfo.EndY = YEnd;
-				m_screenInfo.DX = m_screenInfo.Xpos;
-				m_screenInfo.DY = m_screenInfo.Ypos;
+				m_screen.Xpos = num2;
+				m_screen.Ypos = Ypos;
+				m_screen.EndX = num3;
+				m_screen.EndY = YEnd;
+				m_screen.DX = m_screen.Xpos;
+				m_screen.DY = m_screen.Ypos;
 			}
 			else
 			{
-				m_screenInfo.Xpos = Xpos;
-				m_screenInfo.Ypos = Ypos;
-				m_screenInfo.EndX = XEnd;
-				m_screenInfo.EndY = YEnd;
-				m_screenInfo.DX = m_screenInfo.Xpos;
-				m_screenInfo.DY = m_screenInfo.Ypos;
+				m_screen.Xpos = Xpos;
+				m_screen.Ypos = Ypos;
+				m_screen.EndX = XEnd;
+				m_screen.EndY = YEnd;
+				m_screen.DX = m_screen.Xpos;
+				m_screen.DY = m_screen.Ypos;
 			}
 		}
 		#endregion
@@ -2296,8 +2236,8 @@ namespace NextionEditor
 			m_lcdDevInfo.Width = w;
 			m_lcdDevInfo.Height = h;
 
-			m_screenInfo.EndX = w - 1;
-			m_screenInfo.EndY = h - 1;
+			m_screen.EndX = w - 1;
+			m_screen.EndY = h - 1;
 
 			SetZoom(0);
 
@@ -2364,37 +2304,37 @@ namespace NextionEditor
 			{
 				if (m_isPortrait)
 				{
-					if ((m_screenInfo.DY <= m_screenInfo.EndY) && (m_screenInfo.DX <= m_screenInfo.EndX))
+					if ((m_screen.DY <= m_screen.EndY) && (m_screen.DX <= m_screen.EndX))
 					{
 						if (color != HmiOptions.ColorTransparent)
-							ThisBmp[ThisBmpIndex].SetPixel((m_lcdDevInfo.Width - m_screenInfo.DX) - 1, m_screenInfo.DY, Utility.Get24color(color));
+							ThisBmp[ThisBmpIndex].SetPixel((m_lcdDevInfo.Width - m_screen.DX) - 1, m_screen.DY, Utility.Get24color(color));
 						else if (!HmiOptions.OpenTransparent)
-							ThisBmp[ThisBmpIndex].SetPixel((m_lcdDevInfo.Width - m_screenInfo.DX) - 1, m_screenInfo.DY, Utility.Get24color(HmiOptions.ColorTransparentReplace));
+							ThisBmp[ThisBmpIndex].SetPixel((m_lcdDevInfo.Width - m_screen.DX) - 1, m_screen.DY, Utility.Get24color(HmiOptions.ColorTransparentReplace));
 						else
 							IsTransparent = true;
 
-						m_screenInfo.DX++;
-						if (m_screenInfo.DX > m_screenInfo.EndX)
+						m_screen.DX++;
+						if (m_screen.DX > m_screen.EndX)
 						{
-							m_screenInfo.DX = m_screenInfo.Xpos;
-							m_screenInfo.DY++;
+							m_screen.DX = m_screen.Xpos;
+							m_screen.DY++;
 						}
 					}
 				}
-				else if ((m_screenInfo.DY <= m_screenInfo.EndY) && (m_screenInfo.DX <= m_screenInfo.EndX))
+				else if ((m_screen.DY <= m_screen.EndY) && (m_screen.DX <= m_screen.EndX))
 				{
 					if (color != HmiOptions.ColorTransparent)
-						ThisBmp[ThisBmpIndex].SetPixel(m_screenInfo.DX, m_screenInfo.DY, Utility.Get24color(color));
+						ThisBmp[ThisBmpIndex].SetPixel(m_screen.DX, m_screen.DY, Utility.Get24color(color));
 					else if (!HmiOptions.OpenTransparent)
-						ThisBmp[ThisBmpIndex].SetPixel(m_screenInfo.DX, m_screenInfo.DY, Utility.Get24color(HmiOptions.ColorTransparentReplace));
+						ThisBmp[ThisBmpIndex].SetPixel(m_screen.DX, m_screen.DY, Utility.Get24color(HmiOptions.ColorTransparentReplace));
 					else
 						IsTransparent = true;
 
-					m_screenInfo.DX++;
-					if (m_screenInfo.DX > m_screenInfo.EndX)
+					m_screen.DX++;
+					if (m_screen.DX > m_screen.EndX)
 					{
-						m_screenInfo.DX = m_screenInfo.Xpos;
-						m_screenInfo.DY++;
+						m_screen.DX = m_screen.Xpos;
+						m_screen.DY++;
 					}
 				}
 			}
@@ -2476,10 +2416,10 @@ namespace NextionEditor
 		#endregion
 
 		#region MakeAttr
-		public unsafe bool MakeAttr(byte[] buf, ref InfoRunAttribute attr1, ref InfoRunAttribute attr2, byte operation)
+		private unsafe bool makeAttr(byte[] buf, ref AttributeRun attr1, ref AttributeRun attr2, byte operation)
 		{
-			if (attr2.AttInfo.AttrType < HmiAttributeType.String
-			 && attr1.AttInfo.AttrType < HmiAttributeType.String
+			if (attr2.AttrInfo.AttrType < HmiAttributeType.String
+			 && attr1.AttrInfo.AttrType < HmiAttributeType.String
 				)
 			{
 				if (operation == 0xA1)
@@ -2495,12 +2435,12 @@ namespace NextionEditor
 				if (operation == 0x85)
 					return (attr1.Value != attr2.Value);
 			}
-			else if (attr2.AttInfo.AttrType == HmiAttributeType.String
-				  && attr1.AttInfo.AttrType == HmiAttributeType.String
+			else if (attr2.AttrInfo.AttrType == HmiAttributeType.String
+				  && attr1.AttrInfo.AttrType == HmiAttributeType.String
 				  && (operation == 0xA1 || operation == 0x85)
 					)
 			{
-				if (compareString(attr1.Pz, attr2.Pz, 0) == 1)
+				if (compareString(attr1.Pz, attr2.Pz, 0))
 					return (operation == 0xA1);
 				return (operation != 0xA1);
 			}
@@ -2508,36 +2448,36 @@ namespace NextionEditor
 		}
 		#endregion
 
-		public unsafe byte compareString(byte[] v1, string str, uint length)
+		private unsafe bool compareString(byte[] v1, string str, uint length)
 		{
 			fixed(byte* pv1 = &v1[0])
 			fixed (byte* numRef = Utility.MergeBytes(Utility.ToBytes(str), Utility.BYTE_ZERO))
 				return compareString(pv1, numRef, length);
 		}
 
-		private unsafe byte compareString(byte* src1, byte* src2, uint length)
+		private unsafe bool compareString(byte* src1, byte* src2, uint length)
 		{
 			if (length != 0)
 			{
 				while (length != 0)
 				{
 					if (*src1 != *src2)
-						return 0;
+						return false;
 					src1++;
 					src2++;
 					length--;
 				}
-				return 1;
+				return true;
 			}
 
 			while (*src1 == *src2)
 			{
 				if (*src1 == 0)
-					return 1;
+					return true;
 				src1++;
 				src2++;
 			}
-			return 0;
+			return false;
 		}
 
 		private unsafe void memcpy(byte* dst, byte* src, uint length)
@@ -2578,7 +2518,7 @@ namespace NextionEditor
 			}
 			else
 			{
-				m_timeInf.movetime = 0;
+				m_hmiTime.MoveTime = 0;
 				TPDevInf.X = (ushort)e.X;
 				TPDevInf.Y = (ushort)e.Y;
 				TPDevInf.X0 = TPDevInf.X;
@@ -2606,23 +2546,6 @@ namespace NextionEditor
 			RefreshPaint();
 		}
 
-
-		public void PauseScreen()
-		{
-			try
-			{
-				if (m_reader != null)
-				{
-					m_reader.Close();
-					m_reader.Dispose();
-					m_reader = null;
-				}
-			}
-			catch (Exception ex)
-			{
-				MessageBox.Show(ex.Message);
-			}
-		}
 
 		private bool picq(ushort x, ushort y, ushort w, ushort h, ushort x2, ushort y2, ref InfoPicture mpicture)
 		{
@@ -2658,17 +2581,17 @@ namespace NextionEditor
 			return true;
 		}
 
-		public unsafe ushort GetU16(InfoRange range, byte[] buf)
+		public unsafe ushort GetU16(Range range, byte[] buf)
 		{
 			return (ushort)GetU32(range, buf);
 		}
 
-		public unsafe uint GetU32(InfoRange range, byte[] bytes)
+		public unsafe uint GetU32(Range range, byte[] bytes)
 		{
-			InfoRunAttribute[] runattinfArray = new InfoRunAttribute[2];
+			AttributeRun[] runattinfArray = new AttributeRun[2];
 			ushort index = getStringAttribute(bytes, range, ref runattinfArray[1]);
 
-			runattinfArray[1].AttInfo.DataStart = datafrom_zan;
+			runattinfArray[1].AttrInfo.DataStart = dataFrom_We;
 
 			while (index < range.End)
 			{
@@ -2678,14 +2601,14 @@ namespace NextionEditor
 					byte operation = bytes[index];
 					range.Begin = (ushort)(index + 1);
 					index = getStringAttribute(bytes, range, ref runattinfArray[0]);
-					if (runattinfArray[0].AttInfo.DataStart == datafrom_null
-					 && runattinfArray[0].AttInfo.AttrType > 9
+					if (runattinfArray[0].AttrInfo.DataStart == dataFrom_Null
+					 && runattinfArray[0].AttrInfo.AttrType > 9
 						)
 					{
 						sendReturnErr(0x1A);
 						return 0;
 					}
-					runattinfArray[1].AttInfo.DataStart = datafrom_zan;
+					runattinfArray[1].AttrInfo.DataStart = dataFrom_We;
 					if (AttributeAdd(bytes, ref runattinfArray[1], ref runattinfArray[0], ref runattinfArray[1], operation) == 0)
 						return 0;
 				}
@@ -2820,13 +2743,16 @@ namespace NextionEditor
 			if (GuiApp.PageInfo.InstStart == 0xffff || GuiApp.PageInfo.InstEnd == 0xffff)
 				return true;
 
-			InfoRange laction = new InfoRange(0, 2);
-			ushort idx = (ushort)(GuiApp.PageInfo.InstStart + 1);
-
-			while (idx <= GuiApp.PageInfo.InstEnd)
+			Range laction = new Range(0, 2);
+			ushort idx;
+			for (
+				idx = (ushort)(GuiApp.PageInfo.InstStart + 1);
+				idx <= GuiApp.PageInfo.InstEnd;
+				++idx
+				)
 			{
 				InfoString infoString = readInfoString(idx);
-				m_hexStrBuf = SPI_Flash_Read(
+				SPI_Flash_Read(ref m_hexStrBuf,
 						GuiApp.App.StringDataStart + infoString.Start,
 						infoString.Size
 					);
@@ -2844,17 +2770,12 @@ namespace NextionEditor
 					}
 					else if ((num3 + infoString.Size - 4) <= GuiApp.CustomData.Length)
 					{
-						for (ushort i = 4; i < infoString.Size; i++)
-						{
-							GuiApp.CustomData[num3] = m_hexStrBuf[i];
-							num3++;
-						}
+						for (ushort i = 4; i < infoString.Size; ++i)
+							GuiApp.CustomData[num3++] = m_hexStrBuf[i];
 					}
 				}
-				++idx;
 			}
 			GuiApp.HexStrIndex = (ushort)(idx + 1);
-
 			return true;
 		}
 
@@ -2881,11 +2802,11 @@ namespace NextionEditor
 				LcdFirst = true;
 		}
 
-		private unsafe bool RunCode(byte[] buf, string pattern, int paramCount, InfoRange pos)
+		private unsafe bool RunCode(byte[] buf, string pattern, int paramCount, Range pos)
 		{
 			int begin = 0;
 			int index = 0;
-			InfoRange laction = new InfoRange();
+			Range laction = new Range();
 			laction.End = pos.End;
 			begin = Utility.IndexOf(buf, pattern, pos);
 			if (begin == 0xffff)
@@ -2925,7 +2846,7 @@ namespace NextionEditor
 			Thread.Sleep(100);
 
 			m_lcdDevInfo.Draw = 0;
-			m_lcdDevInfo.DrawColor = 0xf800;
+			m_lcdDevInfo.DrawColor = 0xF800;
 
 			m_sysTimer.ThSp = 0;
 			m_sysTimer.ThSleepUp = 0;
@@ -2935,7 +2856,7 @@ namespace NextionEditor
 
 			while (m_runState == 1)
 			{
-				Tp_scan();
+				touchScan();
 				if (label1.Visible)
 				{
 					setLabelText(label1, "Run" + m_ComQueue.DiulieYunxing.ToString());
@@ -2955,11 +2876,12 @@ namespace NextionEditor
 						else
 						{
 							ScanComCode();
-							for (int i = 0; i < m_timerCount; i++)
+							for (int i = 0; i < m_timers.Length; i++)
 							{
-								if ((m_timerInfo[i].State == 1) && (m_timerInfo[i].Value >= m_timerInfo[i].MaxValue))
+								if (m_timers[i].State == 1
+								 && m_timers[i].Value >= m_timers[i].MaxValue)
 								{
-									GuiApp.HexStrIndex = m_timerInfo[i].CodeBegin;
+									GuiApp.HexStrIndex = m_timers[i].CodeBegin;
 									GuiApp.TimerIndex = (byte)i;
 								}
 							}
@@ -2998,7 +2920,7 @@ namespace NextionEditor
 			LcdFirst = false;
 		}
 
-		public unsafe void RunStop()
+		public void RunStop()
 		{
 			try
 			{
@@ -3035,7 +2957,7 @@ namespace NextionEditor
 		{
 			if (m_ComQueue.Queue[m_ComQueue.DiulieYunxing].End != 0xffff)
 			{
-				InfoRange range = m_ComQueue.Queue[m_ComQueue.DiulieYunxing];
+				Range range = m_ComQueue.Queue[m_ComQueue.DiulieYunxing];
 				if (m_ComQueue.CodePause == 0xff)
 				{
 					if (CodeExecute(m_comBuffer, range, 0))
@@ -3074,32 +2996,33 @@ namespace NextionEditor
 			}
 		}
 
+		#region scanHexCode()
 		private unsafe void scanHexCode()
 		{
-			byte num = 1;
-			InfoRange posCode = new InfoRange();
-			InfoString infoString = new InfoString();
 			if (label1.Visible)
-				SendRunCode("hexcmd " + GuiApp.HexStrIndex.ToString(), null);
+				SendRunCode("hexcmd " + GuiApp.HexStrIndex.ToString());
 
-			infoString = readInfoString(GuiApp.HexStrIndex);
+			InfoString infoString = readInfoString(GuiApp.HexStrIndex);
 			GuiApp.HexStrIndex++;
-			m_hexStrBuf = SPI_Flash_Read(GuiApp.App.StringDataStart + infoString.Start, infoString.Size);
+			SPI_Flash_Read(ref m_hexStrBuf, GuiApp.App.StringDataStart + infoString.Start, infoString.Size);
 			if (infoString.Size == 0)
 				return;
 
-			if (compareString(m_hexStrBuf, "end", 3) == 1 || compareString(m_hexStrBuf, "tend", 4) == 1)
+			if (compareString(m_hexStrBuf, "end", 3)
+			 || compareString(m_hexStrBuf, "tend", 4)
+				)
 			{
 				GuiApp.HexStrIndex = 0xffff;
 				if (GuiApp.TimerIndex < 5)
 				{
-					m_timerInfo[GuiApp.TimerIndex].Value = 0;
+					m_timers[GuiApp.TimerIndex].Value = 0;
 					GuiApp.TimerIndex = 0xff;
 				}
 
-				while (num == 1)
+				bool run = true;
+				while (run)
 				{
-					num = 0;
+					run = false;
 					if (guiObjectRtRef() == 0xff)
 					{
 						if (GuiApp.Delay > 0)
@@ -3109,22 +3032,21 @@ namespace NextionEditor
 						}
 					}
 					else if (GuiApp.HexStrIndex == 0xffff)
-						num = 1;
+						run = true;
 				}
 				if (GuiApp.HexStrIndex == 0xffff)
 					GuiApp.HexStrIndex = getHexStr();
 			}
 			else
 			{
-				posCode.Begin = 0;
-				posCode.End = (ushort)(infoString.Size - 1);
-
-				System.Diagnostics.Debug.WriteLine(Utility.GetString(m_hexStrBuf));
-				if (CodeExecute(m_hexStrBuf, posCode, 0))
+				Range range = new Range(0, infoString.Size - 1);
+				if (CodeExecute(m_hexStrBuf, range, 0))
 					LcdFirst = true;
 			}
 		}
+		#endregion
 
+		#region scanHotSpotDown / scanHotSpotUp
 		private void scanHotSpotDown()
 		{
 			sendTouchState(1);
@@ -3139,39 +3061,116 @@ namespace NextionEditor
 			GuiApp.MoveObjId = 0xff;
 		}
 
-		private unsafe void send_va(ref InfoRunAttribute att1, byte state)
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="state">1 for touch down, 0 for up</param>
+		/// <returns></returns>
+		private unsafe byte sendTouchState(byte state)
 		{
-			fixed (InfoRunAttribute* runattinfRef = &att1)
+			InfoObject infoObject;
+			infoObject.Panel.SendKey = 0;
+
+			byte index = (byte)(GuiApp.PageInfo.ObjEnd - GuiApp.PageInfo.ObjStart);
+			if (GuiApp.Touch.SendXY == 1)
+			{
+				sendByte(0x67);
+				sendByte((byte)(TPDevInf.X0 >> 8));
+				sendByte((byte)(TPDevInf.X0 >> 0));
+				sendByte((byte)(TPDevInf.Y0 >> 8));
+				sendByte((byte)(TPDevInf.Y0 >> 0));
+				sendByte(state);
+				sendEnd();
+			}
+
+			if (state == 1)
+			{	// Touch Down
+				for (ushort num = GuiApp.PageInfo.ObjEnd; num >= GuiApp.PageInfo.ObjStart; --num)
+				{
+					if (GuiApp.PageObjects[index].Visible == 1)
+					{
+						infoObject = ReadObject(num);
+						if (TPDevInf.X0 > infoObject.Panel.X
+						 && TPDevInf.X0 < infoObject.Panel.EndX
+						 && TPDevInf.Y0 > infoObject.Panel.Y
+						 && TPDevInf.Y0 < infoObject.Panel.EndY
+							)
+						{
+							if (GuiApp.PageObjects[index].TouchState == 1)
+							{
+								GuiApp.DownObjId = index;
+								if (infoObject.ObjType == HmiObjType.OBJECT_TYPE_SLIDER)
+									m_guiSlider.GuiSliderPressDown(ref infoObject, index);
+
+								if (infoObject.Panel.Down != 0xffff)
+									GuiApp.HexStrIndex = (ushort)(infoObject.Panel.Down + infoObject.StringInfoStart);
+							}
+							break;
+						}
+					}
+					--index;
+					if (index > 0x7F)
+						return 0xFF;
+				}
+			}
+			else if (state == 0)
+			{	// Touch Up
+				if (GuiApp.DownObjId == 0xff || GuiApp.PageObjects[GuiApp.DownObjId].Visible == 0)
+					return 0xff;
+
+				index = GuiApp.DownObjId;
+				infoObject = ReadObject((ushort)(GuiApp.PageInfo.ObjStart + GuiApp.DownObjId));
+				if (infoObject.ObjType == HmiObjType.OBJECT_TYPE_SLIDER)
+					m_guiSlider.GuiSliderPressUp(ref infoObject, GuiApp.DownObjId);
+
+				if (infoObject.Panel.Up != 0xFF)
+					GuiApp.HexStrIndex = (ushort)(infoObject.StringInfoStart + infoObject.Panel.Up);
+
+				if (infoObject.Panel.Slide != 0xFF)
+					setHexIndex((ushort)(infoObject.StringInfoStart + infoObject.Panel.Slide));
+			}
+
+			if ((infoObject.Panel.SendKey & (byte)(1 << state)) != 0)
+			{
+				sendByte(0x65);
+				sendByte((byte)GuiApp.Page);
+				sendByte(index);
+				sendByte(state);
+				sendEnd();
+			}
+			return index;
+		}
+		#endregion
+
+		private unsafe void send_va(ref AttributeRun att1, bool state)
+		{
+			fixed (AttributeRun* runattinfRef = &att1)
 				send_va(runattinfRef, state);
 		}
 
-		private unsafe void send_va(InfoRunAttribute* attr, byte state)
+		private unsafe void send_va(AttributeRun* attr, bool asCmd)
 		{
 			byte* pz = attr->Pz;
+			byte ch;
 
-			if (attr->AttInfo.AttrType == HmiAttributeType.String)
+			if (attr->AttrInfo.AttrType == HmiAttributeType.String)
 			{
-				if (state == 1)
+				if (asCmd)
 					sendByte(0x70);
-				while (pz[0] != 0)
-				{
-					sendByte(pz[0]);
-					pz++;
-				}
-				if (state == 1)
-					sendEnd();
+				while ((ch = *pz++) != 0)
+					sendByte(ch);
 			}
 			else
 			{
-				if (state == 1)
+				if (asCmd)
 					sendByte(0x71);
-				sendByte((byte)attr->Value);
+				sendByte((byte)(attr->Value >> 0));
 				sendByte((byte)(attr->Value >> 8));
 				sendByte((byte)(attr->Value >> 16));
 				sendByte((byte)(attr->Value >> 24));
-				if (state == 1)
-					sendEnd();
 			}
+			if (asCmd)
+				sendEnd();
 		}
 
 		#region SendComData
@@ -3291,61 +3290,59 @@ namespace NextionEditor
 		}
 
 		#region sendFont
-		private void sendFont(ushort x, ushort y, byte h, byte l)
+		private void sendFont(ushort x, ushort y, byte h, byte ch)
 		{
-			byte[] buffer = new byte[2];
-			ushort num3 = 0;
-			ushort num4 = y;
-			byte w = 0;
-			uint num2 = ((m_fontInfo.DataOffset + GuiApp.App.FontImageStart) + m_fontInfo.NameEnd) + 1;
+			ushort startY = y;
+			byte width = 0;
+			uint fontStart = m_fontInfo.DataOffset + GuiApp.App.FontImageStart + m_fontInfo.NameEnd + 1;
 			if (m_fontInfo.State == 1)
 			{
 				if (h != 0)
 				{
-					w = m_fontInfo.Width;
-					num2 += (uint)(((((h - 0xa1) * 0x5e) + (l - 0xa1)) * (m_fontInfo.Width / 8)) * m_fontInfo.Height);
+					width = m_fontInfo.Width;
+					fontStart += (uint)((((h - 0xA1) * 0x5E + ch - 0xA1) * (m_fontInfo.Width / 8)) * m_fontInfo.Height);
 				}
 				else
 				{
-					w = (byte)(m_fontInfo.Width / 2);
-					num2 += (uint)((((0x1ff2 + l) - 0x20) * (m_fontInfo.Width / 8)) * m_fontInfo.Height);
+					width = (byte)(m_fontInfo.Width / 2);
+					fontStart += (uint)(((0x1ff2 + ch - ' ') * (m_fontInfo.Width / 8)) * m_fontInfo.Height);
 				}
 			}
 			else if (m_fontInfo.State == 0)
 			{
-				w = m_fontInfo.Width;
-				num2 += (uint)((l - ' ') * ((m_fontInfo.Height / 8) * m_fontInfo.Width));
+				width = m_fontInfo.Width;
+				fontStart += (uint)((ch - ' ') * ((m_fontInfo.Height / 8) * m_fontInfo.Width));
 			}
 			else if (m_fontInfo.State == 2)
 			{
 				if (h > 0)
-					w = m_fontInfo.Width;
+					width = m_fontInfo.Width;
 				else
-					w = (byte)(m_fontInfo.Width / 2);
-				num2 = findFontStart(h, l);
+					width = (byte)(m_fontInfo.Width / 2);
+				fontStart = findFontStart(h, ch);
 			}
 
-			num3 = (ushort)((m_fontInfo.Height / 8) * w);
-
-			for (uint i = 0; i < num3; i++)
+			ushort fontBytes = (ushort)((m_fontInfo.Height / 8) * width);
+			for (uint i = 0; i < fontBytes; i++)
 			{
-				buffer = SPI_Flash_Read(num2 + i, 1);
-
-				for (byte j = 0; j < 8; j++)
+				byte data = SPI_Flash_Read(fontStart + i, 1)[0];
+				byte mask = 0x80;
+				while (mask != 0)
 				{
-					if ((buffer[0] & (((int)1) << (7 - j))) > 0)
+					if ((data & mask) > 0)
 						lcdDrawPoint(x, y, GuiApp.BrushInfo.PointColor);
+					mask >>= 1;
 
 					++y;
 					if (y >= m_lcdDevInfo.Height)
 						break;
 
-					if ((y - num4) == m_fontInfo.Height)
+					if ((y - startY) == m_fontInfo.Height)
 					{
-						y = num4;
+						y = startY;
 						x++;
 						if (x >= m_lcdDevInfo.Width)
-							break;	//!!!
+							break;
 						break;		//!!!
 					}
 				}
@@ -3354,59 +3351,59 @@ namespace NextionEditor
 		#endregion
 
 		#region setAttr
-		private unsafe byte setAttr(ref InfoRunAttribute b1, ref InfoRunAttribute b2, byte operation)
+		private unsafe byte setAttr(ref AttributeRun b1, ref AttributeRun b2, byte operation)
 		{
-			fixed (InfoRunAttribute* runattinfRef = &b1)
-			fixed (InfoRunAttribute* runattinfRef2 = &b2)
+			fixed (AttributeRun* runattinfRef = &b1)
+			fixed (AttributeRun* runattinfRef2 = &b2)
 				return setAttr(runattinfRef, runattinfRef2, operation);
 		}
 
-		private unsafe byte setAttr(InfoRunAttribute* b1, InfoRunAttribute* b2, byte operation)
+		private unsafe byte setAttr(AttributeRun* b1, AttributeRun* b2, byte operation)
 		{
 			if (operation == 0
-			 && b2->AttInfo.AttrType < HmiAttributeType.String
-			 && b1->AttInfo.AttrType < HmiAttributeType.String
+			 && b2->AttrInfo.AttrType < HmiAttributeType.String
+			 && b1->AttrInfo.AttrType < HmiAttributeType.String
 				)
 			{
-				if (b2->AttInfo.DataStart == datafrom_zan)
+				if (b2->AttrInfo.DataStart == dataFrom_We)
 				{
 					b2->Value = b1->Value;
 					return 1;
 				}
-				if (b1->Value > b2->AttInfo.MaxValue || b1->Value < b2->AttInfo.MinValue)
+				if (b1->Value > b2->AttrInfo.MaxValue || b1->Value < b2->AttrInfo.MinValue)
 				{
 					sendReturnErr(0x1b);
 					return 0;
 				}
 
-				if (b2->AttInfo.DataStart == datafrom_sys_bl
-				 || b2->AttInfo.DataStart == datafrom_sys_intbl
+				if (b2->AttrInfo.DataStart == dataFrom_Sys_Bl
+				 || b2->AttrInfo.DataStart == dataFrom_Sys_IntBl
 					)
 					return 1;
 
-				if (b2->AttInfo.DataStart != datafrom_sys_baud)
+				if (b2->AttrInfo.DataStart != dataFrom_Sys_Baud)
 				{
-					if (b2->AttInfo.DataStart == datafrom_sys_bauds)
+					if (b2->AttrInfo.DataStart == dataFrom_Sys_Bauds)
 						return 0;
 
-					if (b2->AttInfo.DataStart == datafrom_sys_bkcmd)
+					if (b2->AttrInfo.DataStart == dataFrom_Sys_Bkcmd)
 					{
 						GuiApp.SendReturn = (byte)b1->Value;
 						return 1;
 					}
 
-					if ((b2->AttInfo.DataStart > 0xbd) && (b2->AttInfo.DataStart < 0xc2))
+					if ((b2->AttrInfo.DataStart > 0xbd) && (b2->AttrInfo.DataStart < 0xc2))
 					{
-						GuiApp.System[b2->AttInfo.DataStart - 190] = b1->Value;
+						GuiApp.System[b2->AttrInfo.DataStart - 190] = b1->Value;
 						return 1;
 					}
 
-					if (b2->AttInfo.DataStart == datafrom_ram)
+					if (b2->AttrInfo.DataStart == dataFrom_RAM)
 					{
 						ushort length =
-									(b2->AttInfo.Length < b1->AttInfo.Length)
-									? b2->AttInfo.Length
-									: b1->AttInfo.Length;
+									(b2->AttrInfo.Length < b1->AttrInfo.Length)
+									? b2->AttrInfo.Length
+									: b1->AttrInfo.Length;
 
 						memcpy(b2->Pz, (byte*)&b1->Value, length);
 						return 1;
@@ -3415,9 +3412,9 @@ namespace NextionEditor
 				}
 				return 0;
 			}
-			if (b2->AttInfo.AttrType == HmiAttributeType.String
-			 && b1->AttInfo.AttrType == HmiAttributeType.String
-			 && b2->AttInfo.DataStart == datafrom_ram
+			if (b2->AttrInfo.AttrType == HmiAttributeType.String
+			 && b1->AttrInfo.AttrType == HmiAttributeType.String
+			 && b2->AttrInfo.DataStart == dataFrom_RAM
 				)
 			{
 				ushort num3;
@@ -3427,10 +3424,10 @@ namespace NextionEditor
 				if (operation == 0x2b)
 				{
 					pz += len_b2;
-					num3 = (ushort)((b2->AttInfo.Length - len_b2) - 1);
+					num3 = (ushort)((b2->AttrInfo.Length - len_b2) - 1);
 				}
 				else
-					num3 = (ushort)(b2->AttInfo.Length - 1);
+					num3 = (ushort)(b2->AttrInfo.Length - 1);
 
 				if (num3 > len_b1)
 					num3 = len_b1;
@@ -3551,6 +3548,10 @@ namespace NextionEditor
 			}
 			return bytes;
 		}
+		private void SPI_Flash_Read(ref byte[] dst, uint start, int length)
+		{
+			SPI_Flash_Read(start, length).CopyTo(dst, 0);
+		}
 
 		private unsafe byte StringHZK(ushort x, ushort y, byte* buf, byte mod, ref InfoAction endpoint)
 		{
@@ -3651,7 +3652,7 @@ namespace NextionEditor
 			return 1;
 		}
 
-		public unsafe uint StringToUInt(InfoRange Pos, byte* bt1)
+		public unsafe uint StringToUInt(Range Pos, byte* bt1)
 		{
 			uint num = 0;
 			uint num2 = 1;
@@ -3741,40 +3742,48 @@ namespace NextionEditor
 			ObjMouseUp(HmiObjectEdit, null);
 		}
 
-		private void timerm_5ms()
+		private void timer_5ms()
 		{
 			while (true)
 			{
 				Thread.Sleep(5);
-				m_timeInf.systemruntime += 5;
-				m_timeInf.movetime += 5;
-				m_timeInf.guisystime += 5;
-				if (m_timeInf.guisystime >= 20)
+
+				m_hmiTime.SystemRuntime += 5;
+				m_hmiTime.MoveTime += 5;
+				m_hmiTime.Timer20ms += 5;
+
+				if (m_hmiTime.Timer20ms >= 20)
 				{
-					for (int i = 0; i < m_timerCount; i++)
-						if (m_timerInfo[i].State == 1 && m_timerInfo[i].Value < m_timerInfo[i].MaxValue)
-							m_timerInfo[i].Value = (ushort)(m_timerInfo[i].Value + 20);
-					m_timeInf.guisystime = 0;
+					for (int i = 0; i < m_timers.Length; i++)
+						if (m_timers[i].State == 1
+						 && m_timers[i].Value < m_timers[i].MaxValue
+							)
+							m_timers[i].Value = (ushort)(m_timers[i].Value + 20);
+					m_hmiTime.Timer20ms = 0;
 				}
-				if (TPDevInf.TouchTime > 0 && TPDevInf.TouchTime < uint.MaxValue)
+
+				if (TPDevInf.TouchTime > 0
+				 && TPDevInf.TouchTime < uint.MaxValue
+					)
 					TPDevInf.TouchTime += 5;
 			}
 		}
 
-		private unsafe void Tp_scan()
+		private void touchScan()
 		{
 			if (TPDevInf.TouchState == 1)
 			{
-				TPDevInf.X = (ushort)((Control.MousePosition.X - m_mouse_pos.X) + TPDevInf.X0);
-				TPDevInf.Y = (ushort)((Control.MousePosition.Y - m_mouse_pos.Y) + TPDevInf.Y0);
+				TPDevInf.X = (ushort)(Control.MousePosition.X - m_mouse_pos.X + TPDevInf.X0);
+				TPDevInf.Y = (ushort)(Control.MousePosition.Y - m_mouse_pos.Y + TPDevInf.Y0);
 				if (m_lcdDevInfo.Draw == 1)
 				{
 					LCD_Fill(TPDevInf.X, TPDevInf.Y, 2, 2, m_lcdDevInfo.DrawColor);
 					LcdFirst = true;
 				}
-				if ((GuiApp.MoveObjId < 0xff) && (m_timeInf.movetime > 20))
+
+				if (GuiApp.MoveObjId < 0xff && m_hmiTime.MoveTime > 20)
 				{
-					InfoObject infoObject = ReadObject(GuiApp.MoveObjId + GuiApp.PageInfo.ObjStart);
+					InfoObject infoObject = ReadObject(GuiApp.PageInfo.ObjStart + GuiApp.MoveObjId);
 					if (m_guiSlider.GuiSliderPressMove(ref infoObject, GuiApp.MoveObjId) > 0
 					 && infoObject.Panel.Slide != 0xff
 					 && GuiApp.HexStrIndex == 0xffff
@@ -3782,7 +3791,7 @@ namespace NextionEditor
 						GuiApp.HexStrIndex = (ushort)(infoObject.Panel.Slide + infoObject.StringInfoStart);
 
 					LcdFirst = true;
-					m_timeInf.movetime = 0;
+					m_hmiTime.MoveTime = 0;
 				}
 			}
 		}
@@ -3796,6 +3805,22 @@ namespace NextionEditor
 			{
 				m_reader = new StreamReader(m_binPath);
 				readAppInfo();
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show(ex.Message);
+			}
+		}
+		public void PauseScreen()
+		{
+			try
+			{
+				if (m_reader != null)
+				{
+					m_reader.Close();
+					m_reader.Dispose();
+					m_reader = null;
+				}
 			}
 			catch (Exception ex)
 			{

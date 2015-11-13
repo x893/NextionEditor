@@ -452,7 +452,7 @@ namespace NextionEditor
 		{
 			long num = 0L;
 			m_uptime += timer1.Interval;
-			num = (m_sendsize * 0x3e8) / m_uptime;
+			num = (m_sendsize * 1000) / m_uptime;
 			if (num > 0L)
 			{
 				string[] strArray = new string[] {

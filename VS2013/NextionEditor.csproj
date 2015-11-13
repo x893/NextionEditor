@@ -150,7 +150,6 @@
     <Compile Include="Class\MouseState.cs" />
     <Compile Include="Class\ObjAttOperation.cs" />
     <Compile Include="Class\HmiObjType.cs" />
-    <Compile Include="Class\HmiSysTimer.cs" />
     <Compile Include="Class\Utility.cs" />
     <Compile Include="Control\HmiObjectEdit.cs">
       <SubType>UserControl</SubType>
@@ -221,14 +220,10 @@
     <Compile Include="Info\InfoPageObject.cs" />
     <Compile Include="BinInfo\InfoPanel.cs" />
     <Compile Include="BinInfo\InfoPicture.cs" />
-    <Compile Include="Info\InfoRange.cs" />
-    <Compile Include="Info\InfoRunAttribute.cs" />
+    <Compile Include="Class\Range.cs" />
     <Compile Include="Info\InfoSliderParam.cs" />
     <Compile Include="BinInfo\InfoString.cs" />
-    <Compile Include="Info\InfoTime.cs" />
-    <Compile Include="Info\InfoTimer.cs" />
     <Compile Include="Info\InfoTouch.cs" />
-    <Compile Include="Info\InfoUsartUpdata.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
