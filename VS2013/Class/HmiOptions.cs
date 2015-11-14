@@ -10,6 +10,7 @@ namespace NextionEditor
 		public const ushort MaxCustomDataSize = 0xE00;
 		public const uint FlashInfoFwBegin = 0xB4;
 		public const uint FlashInfoFwEnd = 0xD3;
+		public const byte DataStart_0xBE = 0xBE;
 
 		public static int Language = 0;
 
@@ -31,7 +32,7 @@ namespace NextionEditor
 		public static string DownloadPage = "";
 		public static bool FindEndState = false;
 
-        public static ushort ColorTransparent = 0xa8;
+        public static ushort ColorTransparent = 0xA8;
         public static ushort ColorTransparentReplace = 0xA9;
         public static bool OpenTransparent = false;
 		public static int PopupId = 0;
@@ -49,6 +50,7 @@ namespace NextionEditor
 		public static int InfoStringSize = Marshal.SizeOf(typeof(InfoString));
 		public static int InfoFontSize = Marshal.SizeOf(typeof(InfoFont));
 		public static int InfoAttributeSize = Marshal.SizeOf(typeof(InfoAttribute));
+		public static int InfoNameSize = Marshal.SizeOf(typeof(InfoName));
     }
 }
 

@@ -468,7 +468,7 @@ namespace NextionEditor
 
 		public void RefreshPageId()
 		{
-			for (int i = 0; i < HmiPages.Count; i++)
+			for (ushort i = 0; i < HmiPages.Count; ++i)
 				HmiPages[i].PageId = i;
 		}
 
@@ -747,7 +747,7 @@ namespace NextionEditor
 					InfoPage infoPage = new InfoPage
 					{
 						ObjCount = (byte)hmiPage.HmiObjects.Count,
-						Name = Utility.ToStruct<InfoBytes14>(Utility.ToBytes(hmiPage.Name, 14))
+						Name = Utility.ToStruct<InfoName>(Utility.ToBytes(hmiPage.Name, 14))
 					};
 					if (infoPage.ObjCount > 0)
 					{
@@ -756,7 +756,7 @@ namespace NextionEditor
 						for (int idxObj = 0; idxObj < hmiPage.HmiObjects.Count; idxObj++)
 						{
 							HmiObject hmiObj = hmiPage.HmiObjects[idxObj];
-							hmiObj.ObjInfo.Name = Utility.ToStruct<InfoBytes14>(Utility.ToBytes(hmiObj.ObjName, 14));
+							hmiObj.ObjInfo.Name = Utility.ToStruct<InfoName>(Utility.ToBytes(hmiObj.ObjName, 14));
 							bts.Clear();
 							if (compile)
 								hmiObj.CompileCodes(bts);

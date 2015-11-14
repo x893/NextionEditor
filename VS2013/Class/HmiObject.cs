@@ -186,13 +186,13 @@ namespace NextionEditor
 			{
 				for (int i = 0; i < Attributes.Count; i++)
 				{
-					if (Utility.IndexOf(Attributes[i].Name, "wid".ToBytes(), bufPos, 0) != 0xffff)
+					if (Utility.IndexOfEx(Attributes[i].Name, "wid".ToBytes(), bufPos, false) != 0xffff)
 					{
 						Attributes[i].InfoAttribute.MaxValue = (ushort)((ObjInfo.Panel.EndX - ObjInfo.Panel.X) + 1);
 						if (Attributes[i].Data[0] > Attributes[i].InfoAttribute.MaxValue)
 							SetAttrValue("wid", Attributes[i].InfoAttribute.MaxValue.ToString());
 					}
-					if (Utility.IndexOf(Attributes[i].Name, "hig".ToBytes(), bufPos, 0) != 0xffff)
+					if (Utility.IndexOfEx(Attributes[i].Name, "hig".ToBytes(), bufPos, false) != 0xffff)
 					{
 						Attributes[i].InfoAttribute.MaxValue = (ushort)((ObjInfo.Panel.EndY - ObjInfo.Panel.Y) + 1);
 						if (Attributes[i].Data[0] > Attributes[i].InfoAttribute.MaxValue)
@@ -691,7 +691,7 @@ namespace NextionEditor
 			HmiAttribute hmiAttr = new HmiAttribute();
 			for (int i = 0; i < Attributes.Count; i++)
 			{
-				int idx = Utility.IndexOf(Attributes[i].Name, name.ToBytes(), range, 0);
+				int idx = Utility.IndexOfEx(Attributes[i].Name, name.ToBytes(), range, false);
 				if (idx != 0xffff && (idx == 7 || Attributes[i].Name[idx + 1] == 0))
 					return Attributes[i].Data;
 			}
@@ -1028,7 +1028,7 @@ namespace NextionEditor
 
 			for (int i = 0; i < Attributes.Count; i++)
 			{
-				int num2 = Utility.IndexOf(Attributes[i].Name, Utility.ToBytes(name), range, 0);
+				int num2 = Utility.IndexOfEx(Attributes[i].Name, Utility.ToBytes(name), range, false);
 				if (num2 != 0xffff
 				 && (num2 == 7 || Attributes[i].Name[num2 + 1] == 0)
 				 && Attributes[i].InfoAttribute.AttrType == HmiAttributeType.String
@@ -1192,7 +1192,7 @@ namespace NextionEditor
 			HmiAttribute attr = new HmiAttribute();
 			for (int i = 0; i < Attributes.Count; i++)
 			{
-				int num2 = Utility.IndexOf(Attributes[i].Name, Utility.ToBytes(name, 8), range, 0);
+				int num2 = Utility.IndexOfEx(Attributes[i].Name, Utility.ToBytes(name, 8), range, false);
 				if (num2 != 0xffff && (num2 == 7 || Attributes[i].Name[num2 + 1] == 0))
 				{
 					attr = Attributes[i];

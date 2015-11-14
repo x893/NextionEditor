@@ -46,10 +46,10 @@ namespace NextionEditor
 		private const byte CURVE_PAGE_COUNT = 5;
 		private InfoCurveIndex[] CurveIndex = new InfoCurveIndex[5];
 		private GuiApplication m_guiApp;
-		private HmiRunScreen m_runScreen;
+		private HmiSimulator m_runScreen;
 		private HmiTPDev m_TPDev;
 
-		public GuiCurve(HmiRunScreen scr)
+		public GuiCurve(HmiSimulator scr)
 		{
 			m_runScreen = scr;
 			m_guiApp = scr.GuiApp;

@@ -3,8 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace NextionEditor
 {
-	[StructLayout(LayoutKind.Sequential)]
-	public struct InfoAction
+	public class EndPoint
 	{
 		public ushort EndX;
 		public ushort EndY;

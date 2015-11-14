@@ -4,8 +4,8 @@ using System.Runtime.InteropServices;
 
 namespace NextionEditor
 {
-	public class InfoCodeResults
+	public class CodeResults
 	{
-		public Range[] CodeResults;
+		public List<Range> CodeResult;
 	}
 }

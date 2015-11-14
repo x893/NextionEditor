@@ -14,7 +14,7 @@ namespace NextionEditor
 		public event EventHandler ObjMouseUp;
 
 		public HmiObject HmiObject;
-		public HmiRunScreen HmiRunScreen;
+		public HmiSimulator HmiRunScreen;
 		public bool IsMove = false;
 		public bool IsShowName = true;
 		public bool IsSelected = false;

@@ -12,7 +12,7 @@ namespace NextionEditor
 		public List<HmiObject> HmiObjects = new List<HmiObject>();
 		public List<byte[]> Codes = new List<byte[]>();
 		public string Name = "";
-		public int PageId = 0xffff;
+		public ushort PageId = 0xffff;
 
 		public HmiPage(HmiApplication app)
 		{

@@ -68,7 +68,7 @@ namespace NextionEditor
 		private Panel panel2;
 		private RadioButton rbKeyboardInput;
 		private RadioButton rbMcuInput;
-		private HmiRunScreen ucRunScreen;
+		private HmiSimulator runScreen;
 		private StatusStrip statusStrip;
 		private TextBox tbManualCommand;
 		private TextBox tbInterval;
@@ -94,7 +94,7 @@ namespace NextionEditor
 			InitializeComponent();
 			Utility.Translate(this);
 
-			ucRunScreen.GuiInit(m_binPath, null, false);
+			runScreen.GuiInit(m_binPath, null, false);
 		}
 		#endregion
 
@@ -424,15 +424,15 @@ namespace NextionEditor
 				Pen pen = new Pen(Color.Yellow, 1f);
 				Graphics graphics = panelDisplay.CreateGraphics();
 				graphics.Clear(panelDisplay.BackColor);
-				if (ucRunScreen.Visible && m_showXY)
+				if (runScreen.Visible && m_showXY)
 				{
-					graphics.DrawString("(0,0)", new Font(Encoding.Default.EncodingName, 9f), new SolidBrush(Color.Yellow), (PointF)new Point((ucRunScreen.Left - offset) - 0x11, (ucRunScreen.Top - offset) - 15));
-					graphics.DrawString("X", new Font(Encoding.Default.EncodingName, 9f), new SolidBrush(Color.Yellow), (PointF)new Point((ucRunScreen.Left + (ucRunScreen.Width / 2)) - 5, (ucRunScreen.Top - offset) - 0x11));
-					graphics.DrawString("Y", new Font(Encoding.Default.EncodingName, 9f), new SolidBrush(Color.Yellow), (PointF)new Point(ucRunScreen.Left - 20, (ucRunScreen.Top + (ucRunScreen.Height / 2)) - 5));
-					graphics.DrawLine(pen, new Point(ucRunScreen.Left - offset, ucRunScreen.Top - offset), new Point(ucRunScreen.Left + ucRunScreen.Width, ucRunScreen.Top - offset));
-					graphics.DrawLine(pen, new Point((ucRunScreen.Left + ucRunScreen.Width) - 8, (ucRunScreen.Top - offset) - 4), new Point(ucRunScreen.Left + ucRunScreen.Width, ucRunScreen.Top - offset));
-					graphics.DrawLine(pen, new Point(ucRunScreen.Left - offset, ucRunScreen.Top - offset), new Point(ucRunScreen.Left - offset, ucRunScreen.Top + ucRunScreen.Height));
-					graphics.DrawLine(pen, new Point((ucRunScreen.Left - offset) - 4, (ucRunScreen.Top + ucRunScreen.Height) - 8), new Point(ucRunScreen.Left - offset, ucRunScreen.Top + ucRunScreen.Height));
+					graphics.DrawString("(0,0)", new Font(Encoding.Default.EncodingName, 9f), new SolidBrush(Color.Yellow), (PointF)new Point((runScreen.Left - offset) - 0x11, (runScreen.Top - offset) - 15));
+					graphics.DrawString("X", new Font(Encoding.Default.EncodingName, 9f), new SolidBrush(Color.Yellow), (PointF)new Point((runScreen.Left + (runScreen.Width / 2)) - 5, (runScreen.Top - offset) - 0x11));
+					graphics.DrawString("Y", new Font(Encoding.Default.EncodingName, 9f), new SolidBrush(Color.Yellow), (PointF)new Point(runScreen.Left - 20, (runScreen.Top + (runScreen.Height / 2)) - 5));
+					graphics.DrawLine(pen, new Point(runScreen.Left - offset, runScreen.Top - offset), new Point(runScreen.Left + runScreen.Width, runScreen.Top - offset));
+					graphics.DrawLine(pen, new Point((runScreen.Left + runScreen.Width) - 8, (runScreen.Top - offset) - 4), new Point(runScreen.Left + runScreen.Width, runScreen.Top - offset));
+					graphics.DrawLine(pen, new Point(runScreen.Left - offset, runScreen.Top - offset), new Point(runScreen.Left - offset, runScreen.Top + runScreen.Height));
+					graphics.DrawLine(pen, new Point((runScreen.Left - offset) - 4, (runScreen.Top + runScreen.Height) - 8), new Point(runScreen.Left - offset, runScreen.Top + runScreen.Height));
 				}
 			}
 			catch { }
@@ -480,12 +480,12 @@ namespace NextionEditor
 		{
 			try
 			{
-				ucRunScreen.Left = (panelDisplay.Width - ucRunScreen.Width) / 2;
-				ucRunScreen.Top = (panelDisplay.Height - ucRunScreen.Height) / 2;
-				if (ucRunScreen.Left < 25)
-					ucRunScreen.Left = 25;
-				if (ucRunScreen.Top < 25)
-					ucRunScreen.Top = 25;
+				runScreen.Left = (panelDisplay.Width - runScreen.Width) / 2;
+				runScreen.Top = (panelDisplay.Height - runScreen.Height) / 2;
+				if (runScreen.Left < 25)
+					runScreen.Left = 25;
+				if (runScreen.Top < 25)
+					runScreen.Top = 25;
 			}
 			catch { }
 		}
@@ -503,7 +503,7 @@ namespace NextionEditor
 			{
 				stopSend();
 				m_comMcu.ComClose();
-				ucRunScreen.RunStop();
+				runScreen.RunStop();
 			}
 		}
 		#endregion
@@ -511,7 +511,7 @@ namespace NextionEditor
 		#region ucRunScreen_MouseWheel
 		private void ucRunScreen_MouseWheel(object sender, MouseEventArgs e)
 		{
-			if (ucRunScreen.Visible)
+			if (runScreen.Visible)
 			{
 				setZoomFactor(e.Delta);
 				((HandledMouseEventArgs)e).Handled = true;
@@ -521,7 +521,7 @@ namespace NextionEditor
 		{
 			if (panelDisplay.InvokeRequired)
 				panelDisplay.Invoke(new Action<int>(setZoomFactor), delta);
-			else if (ucRunScreen.SetZoom(delta))
+			else if (runScreen.SetZoom(delta))
 			{
 				resizeForm();
 				panelDisplay.Refresh();
@@ -764,8 +764,8 @@ namespace NextionEditor
 		#region sendSim
 		private void sendSim(string cmd)
 		{
-			if (ucRunScreen.InvokeRequired)
-				ucRunScreen.Invoke(new Action<string>(sendSim), cmd);
+			if (runScreen.InvokeRequired)
+				runScreen.Invoke(new Action<string>(sendSim), cmd);
 			else
 			{
 				cmd = cmd.Trim();
@@ -773,11 +773,11 @@ namespace NextionEditor
 				{
 					byte[] cmdBytes = cmd.ToBytes();
 					for (int i = 0; i < cmdBytes.Length; i++)
-						ucRunScreen.SendComData(cmdBytes[i]);
+						runScreen.SendComData(cmdBytes[i]);
 
-					ucRunScreen.SendComData(0xff);
-					ucRunScreen.SendComData(0xff);
-					ucRunScreen.SendComData(0xff);
+					runScreen.SendComData(0xff);
+					runScreen.SendComData(0xff);
+					runScreen.SendComData(0xff);
 				}
 			}
 		}
@@ -853,7 +853,7 @@ namespace NextionEditor
 					m_ms_lastMcuReceive = 0;
 					data = m_com.ReadByte();
 					if (m_enableMcuReceive)
-						ucRunScreen.SendComData((byte)data);
+						runScreen.SendComData((byte)data);
 					if (data == 0xFF)
 						m_counter_0xFF++;
 					else
@@ -999,7 +999,7 @@ namespace NextionEditor
 			this.lblMcuParse = new System.Windows.Forms.Label();
 			this.linkMcuClear = new System.Windows.Forms.LinkLabel();
 			this.panelDisplay = new System.Windows.Forms.Panel();
-			this.ucRunScreen = new NextionEditor.HmiRunScreen();
+			this.runScreen = new NextionEditor.HmiSimulator();
 			this.rbKeyboardInput = new System.Windows.Forms.RadioButton();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this.rbMcuInput = new System.Windows.Forms.RadioButton();
@@ -1284,7 +1284,7 @@ namespace NextionEditor
 			| System.Windows.Forms.AnchorStyles.Right)));
 			this.panelDisplay.AutoScroll = true;
 			this.panelDisplay.BackColor = System.Drawing.Color.Gray;
-			this.panelDisplay.Controls.Add(this.ucRunScreen);
+			this.panelDisplay.Controls.Add(this.runScreen);
 			this.panelDisplay.Location = new System.Drawing.Point(0, 30);
 			this.panelDisplay.Name = "panelDisplay";
 			this.panelDisplay.Size = new System.Drawing.Size(1016, 531);
@@ -1294,15 +1294,15 @@ namespace NextionEditor
 			// 
 			// ucRunScreen
 			// 
-			this.ucRunScreen.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
-			this.ucRunScreen.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-			this.ucRunScreen.Location = new System.Drawing.Point(54, 50);
-			this.ucRunScreen.Name = "ucRunScreen";
-			this.ucRunScreen.Size = new System.Drawing.Size(100, 100);
-			this.ucRunScreen.TabIndex = 0;
-			this.ucRunScreen.SendByte += new System.EventHandler(this.ucRunScreen_SendByte);
-			this.ucRunScreen.SendRunCode += new NextionEditor.HmiRunScreen.SendRunCodeHandler(this.ucRunScreen_SendRunCode);
-			this.ucRunScreen.Resize += new System.EventHandler(this.ucRunScreen_Resize);
+			this.runScreen.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
+			this.runScreen.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+			this.runScreen.Location = new System.Drawing.Point(54, 50);
+			this.runScreen.Name = "ucRunScreen";
+			this.runScreen.Size = new System.Drawing.Size(100, 100);
+			this.runScreen.TabIndex = 0;
+			this.runScreen.SendByte += new System.EventHandler(this.ucRunScreen_SendByte);
+			this.runScreen.SendRunCode += new NextionEditor.HmiSimulator.SendRunCodeHandler(this.ucRunScreen_SendRunCode);
+			this.runScreen.Resize += new System.EventHandler(this.ucRunScreen_Resize);
 			// 
 			// rbKeyboardInput
 			// 

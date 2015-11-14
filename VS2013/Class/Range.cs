@@ -23,7 +23,7 @@ namespace NextionEditor
 			End = end;
 		}
 
-		public static Range[] List(int size)
+		public static List<Range> List(int size)
 		{
 			List<Range> list = new List<Range>(size);
 			while(size > 0)
@@ -31,7 +31,7 @@ namespace NextionEditor
 				--size;
 				list.Add(new Range());
 			}
-			return list.ToArray();
+			return list;
 		}
 
 		public override string ToString()

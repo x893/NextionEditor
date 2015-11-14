@@ -108,7 +108,7 @@ namespace NextionEditor
 		private PageAdmin pageAdmin;
 		private PicAdmin picAdmin;
 		private FontAdmin fontAdmin;
-		private HmiRunScreen runScreen;
+		private HmiSimulator runScreen;
 		private ToolStripSeparator separator10;
 		private ToolStripSeparator separator11;
 		private ToolStripSeparator separator9;
@@ -795,7 +795,7 @@ namespace NextionEditor
 			this.panel9 = new System.Windows.Forms.Panel();
 			this.splitter3 = new System.Windows.Forms.Splitter();
 			this.panelView = new System.Windows.Forms.Panel();
-			this.runScreen = new NextionEditor.HmiRunScreen();
+			this.runScreen = new NextionEditor.HmiSimulator();
 			this.groupBox1.SuspendLayout();
 			this.statusStrip.SuspendLayout();
 			this.menuStrip.SuspendLayout();
@@ -847,11 +847,11 @@ namespace NextionEditor
 			this.groupBox1.Controls.Add(this.label3);
 			this.groupBox1.Controls.Add(this.btnSaveAsComponent);
 			this.groupBox1.Controls.Add(this.listBox4);
-			this.groupBox1.Location = new System.Drawing.Point(190, 16);
+			this.groupBox1.Location = new System.Drawing.Point(113, 4);
 			this.groupBox1.Margin = new System.Windows.Forms.Padding(4);
 			this.groupBox1.Name = "groupBox1";
 			this.groupBox1.Padding = new System.Windows.Forms.Padding(4);
-			this.groupBox1.Size = new System.Drawing.Size(412, 250);
+			this.groupBox1.Size = new System.Drawing.Size(623, 412);
 			this.groupBox1.TabIndex = 134;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "groupBox1";
@@ -859,19 +859,19 @@ namespace NextionEditor
 			// 
 			// textBox2
 			// 
-			this.textBox2.Location = new System.Drawing.Point(289, 202);
+			this.textBox2.Location = new System.Drawing.Point(221, 202);
 			this.textBox2.Margin = new System.Windows.Forms.Padding(4);
 			this.textBox2.Multiline = true;
 			this.textBox2.Name = "textBox2";
 			this.textBox2.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-			this.textBox2.Size = new System.Drawing.Size(266, 169);
+			this.textBox2.Size = new System.Drawing.Size(259, 140);
 			this.textBox2.TabIndex = 145;
 			// 
 			// label5
 			// 
 			this.label5.AutoSize = true;
 			this.label5.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-			this.label5.Location = new System.Drawing.Point(8, 30);
+			this.label5.Location = new System.Drawing.Point(8, 31);
 			this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.label5.Name = "label5";
 			this.label5.Size = new System.Drawing.Size(54, 17);
@@ -885,17 +885,17 @@ namespace NextionEditor
 			this.textBox1.Multiline = true;
 			this.textBox1.Name = "textBox1";
 			this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-			this.textBox1.Size = new System.Drawing.Size(269, 144);
+			this.textBox1.Size = new System.Drawing.Size(202, 144);
 			this.textBox1.TabIndex = 132;
 			// 
 			// listBox2
 			// 
 			this.listBox2.FormattingEnabled = true;
 			this.listBox2.ItemHeight = 17;
-			this.listBox2.Location = new System.Drawing.Point(11, 226);
+			this.listBox2.Location = new System.Drawing.Point(11, 236);
 			this.listBox2.Margin = new System.Windows.Forms.Padding(4);
 			this.listBox2.Name = "listBox2";
-			this.listBox2.Size = new System.Drawing.Size(92, 106);
+			this.listBox2.Size = new System.Drawing.Size(202, 106);
 			this.listBox2.TabIndex = 115;
 			this.listBox2.SelectedIndexChanged += new System.EventHandler(this.listBox2_SelectedIndexChanged);
 			// 
@@ -903,7 +903,7 @@ namespace NextionEditor
 			// 
 			this.label4.AutoSize = true;
 			this.label4.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-			this.label4.Location = new System.Drawing.Point(8, 205);
+			this.label4.Location = new System.Drawing.Point(8, 215);
 			this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.label4.Name = "label4";
 			this.label4.Size = new System.Drawing.Size(105, 17);
@@ -915,7 +915,7 @@ namespace NextionEditor
 			this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.label1.AutoSize = true;
 			this.label1.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-			this.label1.Location = new System.Drawing.Point(185, -339);
+			this.label1.Location = new System.Drawing.Point(396, -177);
 			this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.label1.Name = "label1";
 			this.label1.Size = new System.Drawing.Size(77, 17);
@@ -928,27 +928,27 @@ namespace NextionEditor
 			this.listBox1.ForeColor = System.Drawing.Color.Black;
 			this.listBox1.FormattingEnabled = true;
 			this.listBox1.ItemHeight = 17;
-			this.listBox1.Location = new System.Drawing.Point(570, 73);
+			this.listBox1.Location = new System.Drawing.Point(488, 52);
 			this.listBox1.Margin = new System.Windows.Forms.Padding(4);
 			this.listBox1.Name = "listBox1";
-			this.listBox1.Size = new System.Drawing.Size(127, 123);
+			this.listBox1.Size = new System.Drawing.Size(127, 140);
 			this.listBox1.TabIndex = 142;
 			// 
 			// textBox3
 			// 
-			this.textBox3.Location = new System.Drawing.Point(289, 52);
+			this.textBox3.Location = new System.Drawing.Point(221, 52);
 			this.textBox3.Margin = new System.Windows.Forms.Padding(4);
 			this.textBox3.Multiline = true;
 			this.textBox3.Name = "textBox3";
 			this.textBox3.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-			this.textBox3.Size = new System.Drawing.Size(266, 144);
+			this.textBox3.Size = new System.Drawing.Size(259, 140);
 			this.textBox3.TabIndex = 106;
 			// 
 			// label3
 			// 
 			this.label3.AutoSize = true;
 			this.label3.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-			this.label3.Location = new System.Drawing.Point(288, 30);
+			this.label3.Location = new System.Drawing.Point(227, 31);
 			this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.label3.Name = "label3";
 			this.label3.Size = new System.Drawing.Size(109, 17);
@@ -958,7 +958,7 @@ namespace NextionEditor
 			// btnSaveAsComponent
 			// 
 			this.btnSaveAsComponent.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-			this.btnSaveAsComponent.Location = new System.Drawing.Point(178, 206);
+			this.btnSaveAsComponent.Location = new System.Drawing.Point(221, 350);
 			this.btnSaveAsComponent.Margin = new System.Windows.Forms.Padding(4);
 			this.btnSaveAsComponent.Name = "btnSaveAsComponent";
 			this.btnSaveAsComponent.Size = new System.Drawing.Size(102, 36);
@@ -971,7 +971,7 @@ namespace NextionEditor
 			// 
 			this.listBox4.FormattingEnabled = true;
 			this.listBox4.ItemHeight = 17;
-			this.listBox4.Location = new System.Drawing.Point(570, 206);
+			this.listBox4.Location = new System.Drawing.Point(488, 202);
 			this.listBox4.Margin = new System.Windows.Forms.Padding(4);
 			this.listBox4.Name = "listBox4";
 			this.listBox4.Size = new System.Drawing.Size(127, 140);
@@ -982,17 +982,17 @@ namespace NextionEditor
 			this.statusStrip.BackColor = System.Drawing.SystemColors.Control;
 			this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.statusLabel});
-			this.statusStrip.Location = new System.Drawing.Point(0, 715);
+			this.statusStrip.Location = new System.Drawing.Point(0, 719);
 			this.statusStrip.Name = "statusStrip";
 			this.statusStrip.Padding = new System.Windows.Forms.Padding(1, 0, 17, 0);
-			this.statusStrip.Size = new System.Drawing.Size(1339, 26);
+			this.statusStrip.Size = new System.Drawing.Size(1339, 22);
 			this.statusStrip.TabIndex = 55;
 			this.statusStrip.Text = "statusStrip1";
 			// 
 			// statusLabel
 			// 
 			this.statusLabel.Name = "statusLabel";
-			this.statusLabel.Size = new System.Drawing.Size(1321, 21);
+			this.statusLabel.Size = new System.Drawing.Size(1321, 17);
 			this.statusLabel.Spring = true;
 			this.statusLabel.Text = "File size:";
 			this.statusLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -1007,7 +1007,7 @@ namespace NextionEditor
 			this.menuStrip.Location = new System.Drawing.Point(0, 0);
 			this.menuStrip.Name = "menuStrip";
 			this.menuStrip.Padding = new System.Windows.Forms.Padding(7, 2, 0, 2);
-			this.menuStrip.Size = new System.Drawing.Size(1339, 29);
+			this.menuStrip.Size = new System.Drawing.Size(1339, 25);
 			this.menuStrip.TabIndex = 173;
 			this.menuStrip.Text = "menuStrip1";
 			// 
@@ -1027,84 +1027,84 @@ namespace NextionEditor
             this.separator11,
             this.miExit});
 			this.mi_File.Name = "mi_File";
-			this.mi_File.Size = new System.Drawing.Size(46, 25);
+			this.mi_File.Size = new System.Drawing.Size(39, 21);
 			this.mi_File.Text = "File";
 			// 
 			// miNew2
 			// 
 			this.miNew2.Name = "miNew2";
-			this.miNew2.Size = new System.Drawing.Size(213, 26);
+			this.miNew2.Size = new System.Drawing.Size(187, 22);
 			this.miNew2.Text = "New";
 			this.miNew2.Click += new System.EventHandler(this.mi_New_Click);
 			// 
 			// miOpen2
 			// 
 			this.miOpen2.Name = "miOpen2";
-			this.miOpen2.Size = new System.Drawing.Size(213, 26);
+			this.miOpen2.Size = new System.Drawing.Size(187, 22);
 			this.miOpen2.Text = "Open";
 			this.miOpen2.Click += new System.EventHandler(this.mi_Open_Click);
 			// 
 			// miOpenBuildFolder
 			// 
 			this.miOpenBuildFolder.Name = "miOpenBuildFolder";
-			this.miOpenBuildFolder.Size = new System.Drawing.Size(213, 26);
+			this.miOpenBuildFolder.Size = new System.Drawing.Size(187, 22);
 			this.miOpenBuildFolder.Text = "Open build folder";
 			this.miOpenBuildFolder.Click += new System.EventHandler(this.mi_Open3_Click);
 			// 
 			// separator10
 			// 
 			this.separator10.Name = "separator10";
-			this.separator10.Size = new System.Drawing.Size(210, 6);
+			this.separator10.Size = new System.Drawing.Size(184, 6);
 			// 
 			// miSave2
 			// 
 			this.miSave2.Name = "miSave2";
-			this.miSave2.Size = new System.Drawing.Size(213, 26);
+			this.miSave2.Size = new System.Drawing.Size(187, 22);
 			this.miSave2.Text = "Save";
 			this.miSave2.Click += new System.EventHandler(this.mi_Save_Click);
 			// 
 			// miSaveAs
 			// 
 			this.miSaveAs.Name = "miSaveAs";
-			this.miSaveAs.Size = new System.Drawing.Size(213, 26);
+			this.miSaveAs.Size = new System.Drawing.Size(187, 22);
 			this.miSaveAs.Text = "Save as";
 			this.miSaveAs.Click += new System.EventHandler(this.mi_SaveAs_Click);
 			// 
 			// miSaveOther
 			// 
 			this.miSaveOther.Name = "miSaveOther";
-			this.miSaveOther.Size = new System.Drawing.Size(213, 26);
+			this.miSaveOther.Size = new System.Drawing.Size(187, 22);
 			this.miSaveOther.Text = "Save Other Version";
 			this.miSaveOther.Click += new System.EventHandler(this.mi_SaveOther_Click);
 			// 
 			// separator9
 			// 
 			this.separator9.Name = "separator9";
-			this.separator9.Size = new System.Drawing.Size(210, 6);
+			this.separator9.Size = new System.Drawing.Size(184, 6);
 			// 
 			// miImportProject
 			// 
 			this.miImportProject.Name = "miImportProject";
-			this.miImportProject.Size = new System.Drawing.Size(213, 26);
+			this.miImportProject.Size = new System.Drawing.Size(187, 22);
 			this.miImportProject.Text = "Import ...";
 			this.miImportProject.Click += new System.EventHandler(this.miImport_Click);
 			// 
 			// miCloseProject
 			// 
 			this.miCloseProject.Name = "miCloseProject";
-			this.miCloseProject.Size = new System.Drawing.Size(213, 26);
+			this.miCloseProject.Size = new System.Drawing.Size(187, 22);
 			this.miCloseProject.Text = "Close Project";
 			this.miCloseProject.Click += new System.EventHandler(this.mi_CloseProject_Click);
 			// 
 			// separator11
 			// 
 			this.separator11.Name = "separator11";
-			this.separator11.Size = new System.Drawing.Size(210, 6);
+			this.separator11.Size = new System.Drawing.Size(184, 6);
 			// 
 			// miExit
 			// 
 			this.miExit.Name = "miExit";
-			this.miExit.Size = new System.Drawing.Size(213, 26);
+			this.miExit.Size = new System.Drawing.Size(187, 22);
 			this.miExit.Text = "Exit";
 			this.miExit.Click += new System.EventHandler(this.miExit_Click);
 			// 
@@ -1114,27 +1114,27 @@ namespace NextionEditor
             this.miFontGenerator,
             this.miEyeDropper});
 			this.miTools.Name = "miTools";
-			this.miTools.Size = new System.Drawing.Size(57, 25);
+			this.miTools.Size = new System.Drawing.Size(51, 21);
 			this.miTools.Text = "Tools";
 			// 
 			// miFontGenerator
 			// 
 			this.miFontGenerator.Name = "miFontGenerator";
-			this.miFontGenerator.Size = new System.Drawing.Size(185, 26);
+			this.miFontGenerator.Size = new System.Drawing.Size(164, 22);
 			this.miFontGenerator.Text = "Font Generator";
 			this.miFontGenerator.Click += new System.EventHandler(this.miFontGenerator_Click);
 			// 
 			// miEyeDropper
 			// 
 			this.miEyeDropper.Name = "miEyeDropper";
-			this.miEyeDropper.Size = new System.Drawing.Size(185, 26);
+			this.miEyeDropper.Size = new System.Drawing.Size(164, 22);
 			this.miEyeDropper.Text = "EyeDropper";
 			this.miEyeDropper.Click += new System.EventHandler(this.miEyeDropper_Click);
 			// 
 			// mi_Help
 			// 
 			this.mi_Help.Name = "mi_Help";
-			this.mi_Help.Size = new System.Drawing.Size(54, 25);
+			this.mi_Help.Size = new System.Drawing.Size(47, 21);
 			this.mi_Help.Text = "Help";
 			this.mi_Help.Click += new System.EventHandler(this.mi_Help_Click);
 			// 
@@ -1144,20 +1144,20 @@ namespace NextionEditor
             this.mi_English,
             this.mi_Chinese});
 			this.mi_Language.Name = "mi_Language";
-			this.mi_Language.Size = new System.Drawing.Size(90, 25);
+			this.mi_Language.Size = new System.Drawing.Size(77, 21);
 			this.mi_Language.Text = "Language";
 			// 
 			// mi_English
 			// 
 			this.mi_English.Name = "mi_English";
-			this.mi_English.Size = new System.Drawing.Size(135, 26);
+			this.mi_English.Size = new System.Drawing.Size(121, 22);
 			this.mi_English.Text = "English";
 			this.mi_English.Click += new System.EventHandler(this.miEnglish_Click);
 			// 
 			// mi_Chinese
 			// 
 			this.mi_Chinese.Name = "mi_Chinese";
-			this.mi_Chinese.Size = new System.Drawing.Size(135, 26);
+			this.mi_Chinese.Size = new System.Drawing.Size(121, 22);
 			this.mi_Chinese.Text = "Chinese";
 			this.mi_Chinese.Click += new System.EventHandler(this.miChinese_Click);
 			// 
@@ -1186,9 +1186,9 @@ namespace NextionEditor
             this.mi_Resolution,
             this.mi_ID,
             this.mi_XY});
-			this.toolBar.Location = new System.Drawing.Point(0, 29);
+			this.toolBar.Location = new System.Drawing.Point(0, 25);
 			this.toolBar.Name = "toolBar";
-			this.toolBar.Size = new System.Drawing.Size(1339, 28);
+			this.toolBar.Size = new System.Drawing.Size(1339, 25);
 			this.toolBar.TabIndex = 174;
 			this.toolBar.Text = "toolStrip1";
 			// 
@@ -1197,7 +1197,7 @@ namespace NextionEditor
 			this.mi_Open.Image = ((System.Drawing.Image)(resources.GetObject("mi_Open.Image")));
 			this.mi_Open.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.mi_Open.Name = "mi_Open";
-			this.mi_Open.Size = new System.Drawing.Size(68, 25);
+			this.mi_Open.Size = new System.Drawing.Size(60, 22);
 			this.mi_Open.Text = "Open";
 			this.mi_Open.Click += new System.EventHandler(this.mi_Open_Click);
 			// 
@@ -1206,7 +1206,7 @@ namespace NextionEditor
 			this.mi_New.Image = ((System.Drawing.Image)(resources.GetObject("mi_New.Image")));
 			this.mi_New.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.mi_New.Name = "mi_New";
-			this.mi_New.Size = new System.Drawing.Size(62, 25);
+			this.mi_New.Size = new System.Drawing.Size(54, 22);
 			this.mi_New.Text = "New";
 			this.mi_New.Click += new System.EventHandler(this.mi_New_Click);
 			// 
@@ -1215,26 +1215,26 @@ namespace NextionEditor
 			this.mi_Save.Image = ((System.Drawing.Image)(resources.GetObject("mi_Save.Image")));
 			this.mi_Save.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.mi_Save.Name = "mi_Save";
-			this.mi_Save.Size = new System.Drawing.Size(63, 25);
+			this.mi_Save.Size = new System.Drawing.Size(55, 22);
 			this.mi_Save.Text = "Save";
 			this.mi_Save.Click += new System.EventHandler(this.mi_Save_Click);
 			// 
 			// toolStripSeparator1
 			// 
 			this.toolStripSeparator1.Name = "toolStripSeparator1";
-			this.toolStripSeparator1.Size = new System.Drawing.Size(6, 28);
+			this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
 			// 
 			// toolStripSeparator2
 			// 
 			this.toolStripSeparator2.Name = "toolStripSeparator2";
-			this.toolStripSeparator2.Size = new System.Drawing.Size(6, 28);
+			this.toolStripSeparator2.Size = new System.Drawing.Size(6, 25);
 			// 
 			// mi_Compile
 			// 
 			this.mi_Compile.Image = ((System.Drawing.Image)(resources.GetObject("mi_Compile.Image")));
 			this.mi_Compile.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.mi_Compile.Name = "mi_Compile";
-			this.mi_Compile.Size = new System.Drawing.Size(88, 25);
+			this.mi_Compile.Size = new System.Drawing.Size(76, 22);
 			this.mi_Compile.Text = "Compile";
 			this.mi_Compile.Click += new System.EventHandler(this.mi_Compile_Click);
 			// 
@@ -1243,7 +1243,7 @@ namespace NextionEditor
 			this.mi_Debug.Image = ((System.Drawing.Image)(resources.GetObject("mi_Debug.Image")));
 			this.mi_Debug.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.mi_Debug.Name = "mi_Debug";
-			this.mi_Debug.Size = new System.Drawing.Size(76, 25);
+			this.mi_Debug.Size = new System.Drawing.Size(67, 22);
 			this.mi_Debug.Text = "Debug";
 			this.mi_Debug.Click += new System.EventHandler(this.mi_Debug_Click);
 			// 
@@ -1252,19 +1252,19 @@ namespace NextionEditor
 			this.mi_Upload.Image = ((System.Drawing.Image)(resources.GetObject("mi_Upload.Image")));
 			this.mi_Upload.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.mi_Upload.Name = "mi_Upload";
-			this.mi_Upload.Size = new System.Drawing.Size(80, 25);
+			this.mi_Upload.Size = new System.Drawing.Size(71, 22);
 			this.mi_Upload.Text = "Upload";
 			this.mi_Upload.Click += new System.EventHandler(this.mi_Upload_Click);
 			// 
 			// toolStripSeparator4
 			// 
 			this.toolStripSeparator4.Name = "toolStripSeparator4";
-			this.toolStripSeparator4.Size = new System.Drawing.Size(6, 28);
+			this.toolStripSeparator4.Size = new System.Drawing.Size(6, 25);
 			// 
 			// toolStripSeparator3
 			// 
 			this.toolStripSeparator3.Name = "toolStripSeparator3";
-			this.toolStripSeparator3.Size = new System.Drawing.Size(6, 28);
+			this.toolStripSeparator3.Size = new System.Drawing.Size(6, 25);
 			// 
 			// mi_AddComponent
 			// 
@@ -1287,111 +1287,111 @@ namespace NextionEditor
 			this.mi_AddComponent.Image = ((System.Drawing.Image)(resources.GetObject("mi_AddComponent.Image")));
 			this.mi_AddComponent.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.mi_AddComponent.Name = "mi_AddComponent";
-			this.mi_AddComponent.Size = new System.Drawing.Size(153, 25);
+			this.mi_AddComponent.Size = new System.Drawing.Size(133, 22);
 			this.mi_AddComponent.Text = "Add Component";
 			// 
 			// mi_Text
 			// 
 			this.mi_Text.Name = "mi_Text";
-			this.mi_Text.Size = new System.Drawing.Size(253, 26);
+			this.mi_Text.Size = new System.Drawing.Size(224, 22);
 			this.mi_Text.Text = "Text";
 			this.mi_Text.Click += new System.EventHandler(this.mi_Text_Click);
 			// 
 			// mi_Number
 			// 
 			this.mi_Number.Name = "mi_Number";
-			this.mi_Number.Size = new System.Drawing.Size(253, 26);
+			this.mi_Number.Size = new System.Drawing.Size(224, 22);
 			this.mi_Number.Text = "Number";
 			this.mi_Number.Click += new System.EventHandler(this.mi_Number_Click);
 			// 
 			// mi_Button
 			// 
 			this.mi_Button.Name = "mi_Button";
-			this.mi_Button.Size = new System.Drawing.Size(253, 26);
+			this.mi_Button.Size = new System.Drawing.Size(224, 22);
 			this.mi_Button.Text = "Button";
 			this.mi_Button.Click += new System.EventHandler(this.mi_Button_Click);
 			// 
 			// mi_ProgressBar
 			// 
 			this.mi_ProgressBar.Name = "mi_ProgressBar";
-			this.mi_ProgressBar.Size = new System.Drawing.Size(253, 26);
+			this.mi_ProgressBar.Size = new System.Drawing.Size(224, 22);
 			this.mi_ProgressBar.Text = "Progress bar";
 			this.mi_ProgressBar.Click += new System.EventHandler(this.mi_ProgressBar_Click);
 			// 
 			// mi_Picture
 			// 
 			this.mi_Picture.Name = "mi_Picture";
-			this.mi_Picture.Size = new System.Drawing.Size(253, 26);
+			this.mi_Picture.Size = new System.Drawing.Size(224, 22);
 			this.mi_Picture.Text = "Picture";
 			this.mi_Picture.Click += new System.EventHandler(this.mi_Picture_Click);
 			// 
 			// mi_CropImage
 			// 
 			this.mi_CropImage.Name = "mi_CropImage";
-			this.mi_CropImage.Size = new System.Drawing.Size(253, 26);
+			this.mi_CropImage.Size = new System.Drawing.Size(224, 22);
 			this.mi_CropImage.Text = "Crop Image";
 			this.mi_CropImage.Click += new System.EventHandler(this.mi_CropImage_Click);
 			// 
 			// mi_Hotspot
 			// 
 			this.mi_Hotspot.Name = "mi_Hotspot";
-			this.mi_Hotspot.Size = new System.Drawing.Size(253, 26);
+			this.mi_Hotspot.Size = new System.Drawing.Size(224, 22);
 			this.mi_Hotspot.Text = "Hotspot";
 			this.mi_Hotspot.Click += new System.EventHandler(this.mi_Hotspot_Click);
 			// 
 			// mi_Gauges
 			// 
 			this.mi_Gauges.Name = "mi_Gauges";
-			this.mi_Gauges.Size = new System.Drawing.Size(253, 26);
+			this.mi_Gauges.Size = new System.Drawing.Size(224, 22);
 			this.mi_Gauges.Text = "Gauges";
 			this.mi_Gauges.Click += new System.EventHandler(this.mi_Gauges_Click);
 			// 
 			// mi_Waveform
 			// 
 			this.mi_Waveform.Name = "mi_Waveform";
-			this.mi_Waveform.Size = new System.Drawing.Size(253, 26);
+			this.mi_Waveform.Size = new System.Drawing.Size(224, 22);
 			this.mi_Waveform.Text = "Waveform";
 			this.mi_Waveform.Click += new System.EventHandler(this.mi_Waveform_Click);
 			// 
 			// mi_Slider
 			// 
 			this.mi_Slider.Name = "mi_Slider";
-			this.mi_Slider.Size = new System.Drawing.Size(253, 26);
+			this.mi_Slider.Size = new System.Drawing.Size(224, 22);
 			this.mi_Slider.Text = "Slider";
 			this.mi_Slider.Click += new System.EventHandler(this.mi_Slider_Click);
 			// 
 			// mi_Timer
 			// 
 			this.mi_Timer.Name = "mi_Timer";
-			this.mi_Timer.Size = new System.Drawing.Size(253, 26);
+			this.mi_Timer.Size = new System.Drawing.Size(224, 22);
 			this.mi_Timer.Text = "Timer";
 			this.mi_Timer.Click += new System.EventHandler(this.mi_Timer_Click);
 			// 
 			// mi_Variable
 			// 
 			this.mi_Variable.Name = "mi_Variable";
-			this.mi_Variable.Size = new System.Drawing.Size(253, 26);
+			this.mi_Variable.Size = new System.Drawing.Size(224, 22);
 			this.mi_Variable.Text = "Variable";
 			this.mi_Variable.Click += new System.EventHandler(this.mi_Variable_Click);
 			// 
 			// mi_DualButton
 			// 
 			this.mi_DualButton.Name = "mi_DualButton";
-			this.mi_DualButton.Size = new System.Drawing.Size(253, 26);
+			this.mi_DualButton.Size = new System.Drawing.Size(224, 22);
 			this.mi_DualButton.Text = "Dual-state button";
 			this.mi_DualButton.Click += new System.EventHandler(this.mi_DualButton_Click);
 			// 
 			// mi_RadioBox
 			// 
 			this.mi_RadioBox.Name = "mi_RadioBox";
-			this.mi_RadioBox.Size = new System.Drawing.Size(253, 26);
+			this.mi_RadioBox.Size = new System.Drawing.Size(224, 22);
 			this.mi_RadioBox.Text = "Radio box (coming soon)";
 			this.mi_RadioBox.Click += new System.EventHandler(this.mi_RadioBox_Click);
 			// 
 			// mi_Checkbox
 			// 
 			this.mi_Checkbox.Name = "mi_Checkbox";
-			this.mi_Checkbox.Size = new System.Drawing.Size(253, 26);
+			this.mi_Checkbox.Size = new System.Drawing.Size(224, 22);
 			this.mi_Checkbox.Text = "Checkbox (coming soon)";
 			this.mi_Checkbox.Click += new System.EventHandler(this.mi_Checkbox_Click);
 			// 
@@ -1403,39 +1403,39 @@ namespace NextionEditor
 			this.mi_DeleteComponent.Image = ((System.Drawing.Image)(resources.GetObject("mi_DeleteComponent.Image")));
 			this.mi_DeleteComponent.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.mi_DeleteComponent.Name = "mi_DeleteComponent";
-			this.mi_DeleteComponent.Size = new System.Drawing.Size(169, 25);
+			this.mi_DeleteComponent.Size = new System.Drawing.Size(146, 22);
 			this.mi_DeleteComponent.Text = "Delete Component";
 			// 
 			// mi_DeleteSelected
 			// 
 			this.mi_DeleteSelected.Name = "mi_DeleteSelected";
-			this.mi_DeleteSelected.Size = new System.Drawing.Size(272, 26);
+			this.mi_DeleteSelected.Size = new System.Drawing.Size(238, 22);
 			this.mi_DeleteSelected.Text = "Delete Selected Component";
 			this.mi_DeleteSelected.Click += new System.EventHandler(this.mi_DeleteSelected_Click);
 			// 
 			// mi_DeleteAll
 			// 
 			this.mi_DeleteAll.Name = "mi_DeleteAll";
-			this.mi_DeleteAll.Size = new System.Drawing.Size(272, 26);
+			this.mi_DeleteAll.Size = new System.Drawing.Size(238, 22);
 			this.mi_DeleteAll.Text = "Delete All Components";
 			this.mi_DeleteAll.Click += new System.EventHandler(this.mi_DeleteAll_Click);
 			// 
 			// toolStripSeparator5
 			// 
 			this.toolStripSeparator5.Name = "toolStripSeparator5";
-			this.toolStripSeparator5.Size = new System.Drawing.Size(6, 28);
+			this.toolStripSeparator5.Size = new System.Drawing.Size(6, 25);
 			// 
 			// toolStripSeparator6
 			// 
 			this.toolStripSeparator6.Name = "toolStripSeparator6";
-			this.toolStripSeparator6.Size = new System.Drawing.Size(6, 28);
+			this.toolStripSeparator6.Size = new System.Drawing.Size(6, 25);
 			// 
 			// mi_Copy
 			// 
 			this.mi_Copy.Image = ((System.Drawing.Image)(resources.GetObject("mi_Copy.Image")));
 			this.mi_Copy.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.mi_Copy.Name = "mi_Copy";
-			this.mi_Copy.Size = new System.Drawing.Size(66, 25);
+			this.mi_Copy.Size = new System.Drawing.Size(58, 22);
 			this.mi_Copy.Text = "Copy";
 			this.mi_Copy.Click += new System.EventHandler(this.mi_Copy_Click);
 			// 
@@ -1444,26 +1444,26 @@ namespace NextionEditor
 			this.mi_Paste.Image = ((System.Drawing.Image)(resources.GetObject("mi_Paste.Image")));
 			this.mi_Paste.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.mi_Paste.Name = "mi_Paste";
-			this.mi_Paste.Size = new System.Drawing.Size(66, 25);
+			this.mi_Paste.Size = new System.Drawing.Size(59, 22);
 			this.mi_Paste.Text = "Paste";
 			this.mi_Paste.Click += new System.EventHandler(this.mi_Paste_Click);
 			// 
 			// toolStripSeparator7
 			// 
 			this.toolStripSeparator7.Name = "toolStripSeparator7";
-			this.toolStripSeparator7.Size = new System.Drawing.Size(6, 28);
+			this.toolStripSeparator7.Size = new System.Drawing.Size(6, 25);
 			// 
 			// toolStripSeparator8
 			// 
 			this.toolStripSeparator8.Name = "toolStripSeparator8";
-			this.toolStripSeparator8.Size = new System.Drawing.Size(6, 28);
+			this.toolStripSeparator8.Size = new System.Drawing.Size(6, 25);
 			// 
 			// mi_Resolution
 			// 
 			this.mi_Resolution.Image = ((System.Drawing.Image)(resources.GetObject("mi_Resolution.Image")));
 			this.mi_Resolution.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.mi_Resolution.Name = "mi_Resolution";
-			this.mi_Resolution.Size = new System.Drawing.Size(104, 25);
+			this.mi_Resolution.Size = new System.Drawing.Size(89, 22);
 			this.mi_Resolution.Text = "Resolution";
 			this.mi_Resolution.Click += new System.EventHandler(this.mi_Resolution_Click);
 			// 
@@ -1473,7 +1473,7 @@ namespace NextionEditor
 			this.mi_ID.Image = ((System.Drawing.Image)(resources.GetObject("mi_ID.Image")));
 			this.mi_ID.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.mi_ID.Name = "mi_ID";
-			this.mi_ID.Size = new System.Drawing.Size(23, 25);
+			this.mi_ID.Size = new System.Drawing.Size(23, 22);
 			this.mi_ID.Text = "ID";
 			this.mi_ID.Click += new System.EventHandler(this.mi_ID_Click);
 			// 
@@ -1483,7 +1483,7 @@ namespace NextionEditor
 			this.mi_XY.Image = ((System.Drawing.Image)(resources.GetObject("mi_XY.Image")));
 			this.mi_XY.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.mi_XY.Name = "mi_XY";
-			this.mi_XY.Size = new System.Drawing.Size(32, 25);
+			this.mi_XY.Size = new System.Drawing.Size(27, 22);
 			this.mi_XY.Text = "XY";
 			this.mi_XY.Click += new System.EventHandler(this.mi_XY_Click);
 			// 
@@ -1493,10 +1493,10 @@ namespace NextionEditor
 			this.panelLeft.Controls.Add(this.splitter4);
 			this.panelLeft.Controls.Add(this.panelFontAdmin);
 			this.panelLeft.Dock = System.Windows.Forms.DockStyle.Left;
-			this.panelLeft.Location = new System.Drawing.Point(0, 57);
+			this.panelLeft.Location = new System.Drawing.Point(0, 50);
 			this.panelLeft.Margin = new System.Windows.Forms.Padding(4);
 			this.panelLeft.Name = "panelLeft";
-			this.panelLeft.Size = new System.Drawing.Size(256, 658);
+			this.panelLeft.Size = new System.Drawing.Size(256, 669);
 			this.panelLeft.TabIndex = 177;
 			// 
 			// panelPicAdmin
@@ -1507,7 +1507,7 @@ namespace NextionEditor
 			this.panelPicAdmin.Location = new System.Drawing.Point(0, 0);
 			this.panelPicAdmin.Margin = new System.Windows.Forms.Padding(4);
 			this.panelPicAdmin.Name = "panelPicAdmin";
-			this.panelPicAdmin.Size = new System.Drawing.Size(256, 405);
+			this.panelPicAdmin.Size = new System.Drawing.Size(256, 416);
 			this.panelPicAdmin.TabIndex = 2;
 			this.panelPicAdmin.Resize += new System.EventHandler(this.panelPicAdmin_Resize);
 			// 
@@ -1526,7 +1526,7 @@ namespace NextionEditor
 			// splitter4
 			// 
 			this.splitter4.Dock = System.Windows.Forms.DockStyle.Bottom;
-			this.splitter4.Location = new System.Drawing.Point(0, 405);
+			this.splitter4.Location = new System.Drawing.Point(0, 416);
 			this.splitter4.Margin = new System.Windows.Forms.Padding(4);
 			this.splitter4.Name = "splitter4";
 			this.splitter4.Size = new System.Drawing.Size(256, 3);
@@ -1538,7 +1538,7 @@ namespace NextionEditor
 			this.panelFontAdmin.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
 			this.panelFontAdmin.Controls.Add(this.fontAdmin);
 			this.panelFontAdmin.Dock = System.Windows.Forms.DockStyle.Bottom;
-			this.panelFontAdmin.Location = new System.Drawing.Point(0, 408);
+			this.panelFontAdmin.Location = new System.Drawing.Point(0, 419);
 			this.panelFontAdmin.Margin = new System.Windows.Forms.Padding(4);
 			this.panelFontAdmin.Name = "panelFontAdmin";
 			this.panelFontAdmin.Size = new System.Drawing.Size(256, 250);
@@ -1562,10 +1562,10 @@ namespace NextionEditor
 			this.panelRight.Controls.Add(this.splitter6);
 			this.panelRight.Controls.Add(this.panelObjAttrs);
 			this.panelRight.Dock = System.Windows.Forms.DockStyle.Right;
-			this.panelRight.Location = new System.Drawing.Point(1083, 57);
+			this.panelRight.Location = new System.Drawing.Point(1083, 50);
 			this.panelRight.Margin = new System.Windows.Forms.Padding(4);
 			this.panelRight.Name = "panelRight";
-			this.panelRight.Size = new System.Drawing.Size(256, 658);
+			this.panelRight.Size = new System.Drawing.Size(256, 669);
 			this.panelRight.TabIndex = 180;
 			// 
 			// panelPageAdmin
@@ -1576,7 +1576,7 @@ namespace NextionEditor
 			this.panelPageAdmin.Location = new System.Drawing.Point(0, 0);
 			this.panelPageAdmin.Margin = new System.Windows.Forms.Padding(4);
 			this.panelPageAdmin.Name = "panelPageAdmin";
-			this.panelPageAdmin.Size = new System.Drawing.Size(256, 255);
+			this.panelPageAdmin.Size = new System.Drawing.Size(256, 266);
 			this.panelPageAdmin.TabIndex = 148;
 			this.panelPageAdmin.Resize += new System.EventHandler(this.panelPageAdmin_Resize);
 			// 
@@ -1595,7 +1595,7 @@ namespace NextionEditor
 			// splitter6
 			// 
 			this.splitter6.Dock = System.Windows.Forms.DockStyle.Bottom;
-			this.splitter6.Location = new System.Drawing.Point(0, 255);
+			this.splitter6.Location = new System.Drawing.Point(0, 266);
 			this.splitter6.Margin = new System.Windows.Forms.Padding(4);
 			this.splitter6.Name = "splitter6";
 			this.splitter6.Size = new System.Drawing.Size(256, 3);
@@ -1607,19 +1607,19 @@ namespace NextionEditor
 			this.panelObjAttrs.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
 			this.panelObjAttrs.Controls.Add(this.m_attributeEdit);
 			this.panelObjAttrs.Dock = System.Windows.Forms.DockStyle.Bottom;
-			this.panelObjAttrs.Location = new System.Drawing.Point(0, 258);
+			this.panelObjAttrs.Location = new System.Drawing.Point(0, 269);
 			this.panelObjAttrs.Margin = new System.Windows.Forms.Padding(4);
 			this.panelObjAttrs.Name = "panelObjAttrs";
 			this.panelObjAttrs.Size = new System.Drawing.Size(256, 400);
 			this.panelObjAttrs.TabIndex = 146;
 			this.panelObjAttrs.Resize += new System.EventHandler(this.panelObjAttrs_Resize);
 			// 
-			// attributeEdit
+			// m_attributeEdit
 			// 
 			this.m_attributeEdit.BackColor = System.Drawing.SystemColors.Control;
 			this.m_attributeEdit.Location = new System.Drawing.Point(8, 8);
 			this.m_attributeEdit.Margin = new System.Windows.Forms.Padding(4);
-			this.m_attributeEdit.Name = "attributeEdit";
+			this.m_attributeEdit.Name = "m_attributeEdit";
 			this.m_attributeEdit.Size = new System.Drawing.Size(234, 339);
 			this.m_attributeEdit.TabIndex = 113;
 			this.m_attributeEdit.ObjectAttach += new System.EventHandler(this.attributeEdit_ObjectAttach);
@@ -1627,20 +1627,20 @@ namespace NextionEditor
 			// 
 			// splitter1
 			// 
-			this.splitter1.Location = new System.Drawing.Point(256, 57);
+			this.splitter1.Location = new System.Drawing.Point(256, 50);
 			this.splitter1.Margin = new System.Windows.Forms.Padding(4);
 			this.splitter1.Name = "splitter1";
-			this.splitter1.Size = new System.Drawing.Size(3, 658);
+			this.splitter1.Size = new System.Drawing.Size(3, 669);
 			this.splitter1.TabIndex = 181;
 			this.splitter1.TabStop = false;
 			// 
 			// splitter2
 			// 
 			this.splitter2.Dock = System.Windows.Forms.DockStyle.Right;
-			this.splitter2.Location = new System.Drawing.Point(1080, 57);
+			this.splitter2.Location = new System.Drawing.Point(1080, 50);
 			this.splitter2.Margin = new System.Windows.Forms.Padding(4);
 			this.splitter2.Name = "splitter2";
-			this.splitter2.Size = new System.Drawing.Size(3, 658);
+			this.splitter2.Size = new System.Drawing.Size(3, 669);
 			this.splitter2.TabIndex = 182;
 			this.splitter2.TabStop = false;
 			// 
@@ -1651,21 +1651,21 @@ namespace NextionEditor
 			this.panelBottom.Controls.Add(this.tbCompilerOutput);
 			this.panelBottom.Controls.Add(this.label2);
 			this.panelBottom.Dock = System.Windows.Forms.DockStyle.Bottom;
-			this.panelBottom.Location = new System.Drawing.Point(259, 529);
+			this.panelBottom.Location = new System.Drawing.Point(259, 533);
 			this.panelBottom.Margin = new System.Windows.Forms.Padding(4);
 			this.panelBottom.Name = "panelBottom";
 			this.panelBottom.Size = new System.Drawing.Size(821, 186);
 			this.panelBottom.TabIndex = 183;
 			this.panelBottom.Paint += new System.Windows.Forms.PaintEventHandler(this.panelBottom_Paint);
 			// 
-			// objAttCompiler
+			// m_compiler
 			// 
 			this.m_compiler.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.m_compiler.BackColor = System.Drawing.Color.White;
 			this.m_compiler.Location = new System.Drawing.Point(248, 31);
 			this.m_compiler.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-			this.m_compiler.Name = "objAttCompiler";
+			this.m_compiler.Name = "m_compiler";
 			this.m_compiler.Size = new System.Drawing.Size(563, 149);
 			this.m_compiler.TabIndex = 178;
 			this.m_compiler.ChangeAttribute += new System.EventHandler(this.objAttCompiler_ChangeAttribute);
@@ -1674,7 +1674,7 @@ namespace NextionEditor
 			// 
 			this.panel9.AutoScroll = true;
 			this.panel9.Dock = System.Windows.Forms.DockStyle.Bottom;
-			this.panel9.Location = new System.Drawing.Point(259, 476);
+			this.panel9.Location = new System.Drawing.Point(259, 480);
 			this.panel9.Margin = new System.Windows.Forms.Padding(4);
 			this.panel9.Name = "panel9";
 			this.panel9.Size = new System.Drawing.Size(821, 50);
@@ -1684,7 +1684,7 @@ namespace NextionEditor
 			// splitter3
 			// 
 			this.splitter3.Dock = System.Windows.Forms.DockStyle.Bottom;
-			this.splitter3.Location = new System.Drawing.Point(259, 526);
+			this.splitter3.Location = new System.Drawing.Point(259, 530);
 			this.splitter3.Margin = new System.Windows.Forms.Padding(4);
 			this.splitter3.Name = "splitter3";
 			this.splitter3.Size = new System.Drawing.Size(821, 3);
@@ -1700,10 +1700,10 @@ namespace NextionEditor
 			this.panelView.Controls.Add(this.groupBox1);
 			this.panelView.Controls.Add(this.runScreen);
 			this.panelView.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.panelView.Location = new System.Drawing.Point(259, 57);
+			this.panelView.Location = new System.Drawing.Point(259, 50);
 			this.panelView.Margin = new System.Windows.Forms.Padding(4);
 			this.panelView.Name = "panelView";
-			this.panelView.Size = new System.Drawing.Size(821, 419);
+			this.panelView.Size = new System.Drawing.Size(821, 430);
 			this.panelView.TabIndex = 185;
 			this.panelView.DragDrop += new System.Windows.Forms.DragEventHandler(this.panelView_DragDrop);
 			this.panelView.DragEnter += new System.Windows.Forms.DragEventHandler(this.panelView_DragEnter);
@@ -1715,7 +1715,7 @@ namespace NextionEditor
 			// 
 			this.runScreen.BackColor = System.Drawing.Color.Black;
 			this.runScreen.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-			this.runScreen.Location = new System.Drawing.Point(66, 16);
+			this.runScreen.Location = new System.Drawing.Point(5, 4);
 			this.runScreen.Margin = new System.Windows.Forms.Padding(4);
 			this.runScreen.Name = "runScreen";
 			this.runScreen.Size = new System.Drawing.Size(100, 100);
@@ -2075,10 +2075,8 @@ namespace NextionEditor
 			int num = (int)sender;
 			string str = Convert.ToString(num, 0x10);
 			if (str.Length == 1)
-			{
 				str = "0" + str;
-			}
-			m_comData = m_comData + "0X" + str + " ";
+			m_comData = m_comData + "0x" + str + " ";
 			if (str == "0a")
 			{
 				listBox1.Items.Add(m_comData.Trim());
@@ -2245,6 +2243,9 @@ namespace NextionEditor
 
 		private void mi_Debug_Click(object sender, EventArgs e)
 		{
+			MessageBox.Show("Temporary unavailable");
+			return;
+
 			if (m_app != null)
 			{
 				if ((!m_app.ChangeApp && m_binpath != "") || fileOperation("compile", ""))

@@ -43,7 +43,7 @@ namespace NextionEditor
 		[XmlIgnore]
 		public uint FlashClearadd;
 		[XmlIgnore]
-		public ushort HexStrIndex;
+		public ushort HexIndex;
 		[XmlIgnore]
 		public byte MoveObjId;
 		[XmlIgnore]

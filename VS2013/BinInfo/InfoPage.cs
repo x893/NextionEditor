@@ -6,7 +6,7 @@
     [StructLayout(LayoutKind.Sequential, Pack=1)]
     public struct InfoPage
     {
-        public InfoBytes14 Name;
+        public InfoName Name;
         public byte res0;
         public byte ObjCount;
         public ushort ObjStart;

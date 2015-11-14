@@ -6,7 +6,7 @@
     [StructLayout(LayoutKind.Sequential, Pack=1)]
     public struct InfoObject
     {
-        public InfoBytes14 Name;
+        public InfoName Name;
         public byte ObjType;
         public byte IsCustomData;
         public ushort AttributeStart;
